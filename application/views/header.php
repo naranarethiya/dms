@@ -1,15 +1,7 @@
 	<header class="header">
 		<a href="<?php echo base_url(); ?>" class="logo">
 			<?php
-			if($this->session->userdata('dms_companyid')!="0") {
-				$this->db->where('dms_companyid',$this->session->userdata('dms_companyid'));
-				$ires=$this->db->get('dms_company');
-				$iaaray=$ires->result_array();
-				echo $iaaray[0]['short_name'];
-			}
-			else {
 				echo "DMS";
-			}
 			?>		
 		</a>
 		<nav class="navbar navbar-static-top" role="navigation">

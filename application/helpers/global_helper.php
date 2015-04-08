@@ -20,7 +20,111 @@ function add_time($min) {
 	return $end_time;
 }
 
+function checkIfInArrayString($array, $searchingFor) {
+	$i=0;
+    foreach ($array as $key=>$element) {
+        if (strpos($element, $searchingFor) !== false) {
+            return array('index'=>$i,'value'=>$key);
+        }
+		$i++;
+    }
+    return false;
+}
+
+function dateformat($date,$format=false) {
+	if(!$format) {
+		$format="d-m-Y";
+	}
+	return date($format,strtotime($date));
+}
+
+function calc_age($date) {
+  if($date=='0000-00-00') {
+    return false;
+  }
+  $old_date=date_create($date);
+  $cur_date=date_create(date('Y-m-d'));
+  $age = $old_date->diff($cur_date)->y;
+  return $age;
+}
+/*
+* You can pass column and value pair to apply filter on your active records
+* You can also pass limit clouse by naming key as upper case LIMIT
+* You can alos pass for order_by by naming  key as upper case ORDER_BY and order by array contain key as column and value as asc or desc
+* 
+* Ex. $filter=array(
+*        "column1" =>'value1',
+*        "column2 <" =>'value2',
+*        "column3 >"=>'value3',
+*        "LIMIT'=>'0,30',
+*        "ORDER_BY"=>
+*          array(
+*            'column1'=>'asc',
+*            'column2'=>'desc'
+*          ),
+*        "WHERE"=>"column1 in (2,5,7) or column2='5'"
+*      );
+*
+*/
+function apply_filter($filter) {
+  $CI=& get_instance();
+  if(is_array($filter)) {
+      foreach($filter as $key => $val) {
+
+        /* limit */
+        if($key==='LIMIT') {
+            if(is_array($val)) {
+                $CI->db->limit($val[0],$val[1]);
+            }
+            else {
+              $CI->db->limit($val);
+            }
+        }
+
+        /* for more complex where 
+            ex:name='Joe' AND status='boss' OR status='active'
+        */
+        else if($key==='WHERE') {
+          $CI->db->where($val,null,FALSE);
+        }
+        else if($key==='WHERE_IN') {
+           foreach($val as $column => $value) {
+              $CI->db->where_in($column,$value);
+            }
+          
+        }
+        else if($key==='HAVING') {
+          if(is_array($val)) {
+            foreach($val as $col=>$value) {
+              $CI->db->having($col,$value);
+            }
+          }
+          else {
+            $CI->db->having($val,null,FALSE);
+          }
+        }
+
+        /* order by */
+        elseif($key=='ORDER_BY') {
+          foreach($val as $col => $order) {
+            $CI->db->order_by($col,$order);
+          }
+        }
+
+        /* simple key=>value where condtions */
+        else {
+          $CI->db->where($key,$val);  
+        }
+
+      }
+    }
+}
+
+
 function get_thumb($image,$thumb) {
+  if($image=='') {
+    return "";
+  }
   $url_array=explode('/',$image);
   $path_array=pathinfo($image);
   $last=count($url_array);
@@ -30,18 +134,29 @@ function get_thumb($image,$thumb) {
   return $thumb_url;
 }
 
-function set_message($message,$type="error") {
-  $CI =& get_instance();
-  if($type=="error") {
-    $add=$CI->session->flashdata('error');
-    $set_message=$add."<p>".$message."</p>";
-    $CI->session->set_flashdata('error',$set_message);
+function parent_child_array($array,$parent_col) {
+  $return = array();
+  foreach($array as $key=>$row) {
+     if (!isset($return[$row[$parent_col]])) {
+        $return[$row[$parent_col]] =$row;
+        $return[$row[$parent_col]]['child'] =array();
+     }
+     else {
+        $return[$row[$parent_col]]['child'][] =$row;
+     }
+  }
+  return $return;
+}
+
+
+function redirect_back() {
+  if(isset($_SERVER['HTTP_REFERER'])) {
+    $url=$_SERVER['HTTP_REFERER'];  
   }
   else {
-    $add=$CI->session->flashdata('success');
-    $set_message=$add."<p>".$message."</p>";
-    $CI->session->set_flashdata('success',$set_message);
+      $url=base_url();
   }
+  redirect($url);
 }
 
 function dsm($var) {
@@ -86,33 +201,16 @@ function monthdiff($date1,$date2) {
   $interval = $datetime2->diff($datetime1);
   return $interval->format('%m');
 }
-/*
-* Create combobox from array
-*/
-function generate_combobox($name,$array,$key,$value,$selected=false,$other=false) {
-  if(empty($array)) {
-    $output = "<select name=\"{$name}\" class=\"form-control\" ".$other.">";
-    $output .= "<option value=\"\">SELECT</option>";    
-    $output .= "</select>";
-  }
-  else{  
-    $output = "<select name=\"{$name}\" class=\"form-control\" ".$other.">";
-    $output .= "<option value=\"\">SELECT</option>";
-    $keys=array_column($array,$key);
-    $vals=array_column($array,$value);
-    $new_array=array_combine($keys,$vals);
 
-    foreach ($new_array as $key => $value) {
-      if ($selected != false && $selected == $key) {
-          $output .= "<option value=\"{$key}\" selected>{$value}</option>";
-      } else {
-          $output .= "<option value=\"{$key}\">{$value}</option>";
-      }
-    }
 
-    $output .= "</select>";
-  }
-  return $output;
+function combine() {
+	$args=func_get_args();
+	$return='';
+	foreach($args as $arg) {
+		$return.=$arg.',';
+	}
+	$return=rtrim($return,',');
+	 return $return;
 }
 
 function formatted_size($size_bytes) { /* {{{ */
@@ -186,6 +284,121 @@ function send_sms($mobile_no,$message) {
     }
   }
 
+/*
+* Convert Amount to word
+*
+**/
+function convert_number_to_words($number) {
+    
+    $hyphen      = '-';
+    $conjunction = ' and ';
+    $separator   = ', ';
+    $negative    = 'negative ';
+    $decimal     = ' point ';
+    $dictionary  = array(
+        0                   => 'zero',
+        1                   => 'one',
+        2                   => 'two',
+        3                   => 'three',
+        4                   => 'four',
+        5                   => 'five',
+        6                   => 'six',
+        7                   => 'seven',
+        8                   => 'eight',
+        9                   => 'nine',
+        10                  => 'ten',
+        11                  => 'eleven',
+        12                  => 'twelve',
+        13                  => 'thirteen',
+        14                  => 'fourteen',
+        15                  => 'fifteen',
+        16                  => 'sixteen',
+        17                  => 'seventeen',
+        18                  => 'eighteen',
+        19                  => 'nineteen',
+        20                  => 'twenty',
+        30                  => 'thirty',
+        40                  => 'fourty',
+        50                  => 'fifty',
+        60                  => 'sixty',
+        70                  => 'seventy',
+        80                  => 'eighty',
+        90                  => 'ninety',
+        100                 => 'hundred',
+        1000                => 'thousand',
+        1000000             => 'million',
+        1000000000          => 'billion',
+        1000000000000       => 'trillion',
+        1000000000000000    => 'quadrillion',
+        1000000000000000000 => 'quintillion'
+    );
+    
+    if (!is_numeric($number)) {
+        return false;
+    }
+    
+    if (($number >= 0 && (int) $number < 0) || (int) $number < 0 - PHP_INT_MAX) {
+        // overflow
+        trigger_error(
+            'convert_number_to_words only accepts numbers between -' . PHP_INT_MAX . ' and ' . PHP_INT_MAX,
+            E_USER_WARNING
+        );
+        return false;
+    }
+
+    if ($number < 0) {
+        return $negative . convert_number_to_words(abs($number));
+    }
+    
+    $string = $fraction = null;
+    
+    if (strpos($number, '.') !== false) {
+        list($number, $fraction) = explode('.', $number);
+    }
+    
+    switch (true) {
+        case $number < 21:
+            $string = $dictionary[$number];
+            break;
+        case $number < 100:
+            $tens   = ((int) ($number / 10)) * 10;
+            $units  = $number % 10;
+            $string = $dictionary[$tens];
+            if ($units) {
+                $string .= $hyphen . $dictionary[$units];
+            }
+            break;
+        case $number < 1000:
+            $hundreds  = $number / 100;
+            $remainder = $number % 100;
+            $string = $dictionary[$hundreds] . ' ' . $dictionary[100];
+            if ($remainder) {
+                $string .= $conjunction . convert_number_to_words($remainder);
+            }
+            break;
+        default:
+            $baseUnit = pow(1000, floor(log($number, 1000)));
+            $numBaseUnits = (int) ($number / $baseUnit);
+            $remainder = $number % $baseUnit;
+            $string = convert_number_to_words($numBaseUnits) . ' ' . $dictionary[$baseUnit];
+            if ($remainder) {
+                $string .= $remainder < 100 ? $conjunction : $separator;
+                $string .= convert_number_to_words($remainder);
+            }
+            break;
+    }
+    
+    if (null !== $fraction && is_numeric($fraction)) {
+        $string .= $decimal;
+        $words = array();
+        foreach (str_split((string) $fraction) as $number) {
+            $words[] = $dictionary[$number];
+        }
+        $string .= implode(' ', $words);
+    }
+    
+    return strtoupper($string);
+}
 /**
  * This file is part of the array_column library
  *
