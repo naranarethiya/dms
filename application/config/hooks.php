@@ -10,6 +10,21 @@
 |
 */
 
+$hook['post_controller_constructor'][] = array(
+									'class'    => 'HookClass',
+									'function' => 'EnableProfiler',
+									'filename' => 'hook.class.php',
+									'filepath' => 'hooks',
+									'params'   => array()
+                                );
+
+$hook['display_override'][] = array(
+									'class'    => 'HookClass',
+									'function' => 'AttechProfilerView',
+									'filename' => 'hook.class.php',
+									'filepath' => 'hooks',
+									'params'   => array()
+                                );
 
 
 /* End of file hooks.php */

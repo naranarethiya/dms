@@ -6,11 +6,12 @@
 
 <body class="skin-blue fixed">
 	<?php $this->load->view('header'); ?>
-	<div class="wrapper row-offcanvas row-offcanvas-left">
-	<?php $this->load->view('sidebar'); ?>
-		<aside class="right-side">
+	<!--<div class="wrapper row-offcanvas row-offcanvas-left">-->
+	<?php //$this->load->view('sidebar'); ?>
+		<aside class="right-side strech">
 		    <!-- Content Header (Page header) -->
             <section class="content-header">
+
                 <h1>
                     <?php 
 						if(isset($title)):
@@ -30,6 +31,6 @@
 				<?php echo $contant; ?>
 			</section>
 		</aside>
-	</div>
+	<!--</div>-->
 </body>
 </html>

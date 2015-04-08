@@ -66,6 +66,22 @@ function calc_age($date) {
 *      );
 *
 */
+
+function set_message($message,$type="error") {
+  $CI =& get_instance();
+  if($type=="error") {
+    $add=$CI->session->userdata('error');
+    $set_message=$add."<li>".$message."</li>";
+    $CI->session->set_userdata('error',$set_message);
+  }
+  else {
+    $add=$CI->session->userdata('success');
+    $set_message=$add."<li>".$message."</li>";
+    $CI->session->set_userdata('success',$set_message);
+  }
+  //dsm($CI->session->all_userdata());die;
+}
+
 function apply_filter($filter) {
   $CI=& get_instance();
   if(is_array($filter)) {
@@ -232,20 +248,6 @@ function dskspace($dir) { /* {{{ */
 		closedir($dh);
 	}
 	return $space;
-}
-
-function parent_child_array($array,$parent_col) {
-  $return = array();
-  foreach($array as $key=>$row) {
-     if (!isset($return[$row[$parent_col]])) {
-        $return[$row[$parent_col]] =$row;
-        $return[$row[$parent_col]]['child'] =array();
-     }
-     else {
-        $return[$row[$parent_col]]['child'][] =$row;
-     }
-  }
-  return $return;
 }
 
 function httpRequest($url) {
