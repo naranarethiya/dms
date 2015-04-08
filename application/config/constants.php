@@ -50,12 +50,12 @@ define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
  define("DMS_READ",1);
  define("DMS_READ_WRITE",2);
  define("DMS_READ_WRITE_SHARE",3);
- define("DMS_ALL_ACCESS",4);
+ define("DMS_ALL",4);
  
  /* relative path of document root */
  define("DOCUMENT_ROOT",APPPATH."/dms_root/");
  
- if ( ! is_dir(DOCUMENT_ROOT)) {
+ if (!is_dir(DOCUMENT_ROOT)) {
 	mkdir(DOCUMENT_ROOT,0777);
 }
  
