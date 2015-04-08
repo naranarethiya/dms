@@ -37,5 +37,27 @@ define('FOPEN_WRITE_CREATE_STRICT',				'xb');
 define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
 
 
+/* 
+|-----------------------------------------------------------
+|	Constant for DMS
+|
+|
+|-----------------------------------------------------------
+ */
+
+/* permission constant */
+ define("DMS_NO_ACCESS",0);
+ define("DMS_READ",1);
+ define("DMS_READ_WRITE",2);
+ define("DMS_READ_WRITE_SHARE",3);
+ define("DMS_ALL_ACCESS",4);
+ 
+ /* relative path of document root */
+ define("DOCUMENT_ROOT",APPPATH."/dms_root/");
+ 
+ if ( ! is_dir(DOCUMENT_ROOT)) {
+	mkdir(DOCUMENT_ROOT,0777);
+}
+ 
 /* End of file constants.php */
 /* Location: ./application/config/constants.php */

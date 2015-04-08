@@ -115,6 +115,41 @@ function generate_combobox($name,$array,$key,$value,$selected=false,$other=false
   return $output;
 }
 
+function formatted_size($size_bytes) { /* {{{ */
+	if ($size_bytes>1000000000) return number_format($size_bytes/1000000000,1,".","")." GBytes";
+	else if ($size_bytes>1000000) return number_format($size_bytes/1000000,1,".","")." MBytes";
+	else if ($size_bytes>1000) return number_format($size_bytes/1000,1,".","")." KBytes";
+	return number_format($size_bytes,0,"","")." Bytes";
+}
+
+function dskspace($dir) { /* {{{ */
+	$space = 0;
+	if(is_file($dir)) {
+		$space = filesize($dir);
+	} elseif (is_dir($dir)) {
+		$dh = opendir($dir);
+		while (($file = readdir($dh)) !== false)
+			if ($file != "." and $file != "..")
+				$space += dskspace($dir."/".$file);
+		closedir($dh);
+	}
+	return $space;
+}
+
+function parent_child_array($array,$parent_col) {
+  $return = array();
+  foreach($array as $key=>$row) {
+     if (!isset($return[$row[$parent_col]])) {
+        $return[$row[$parent_col]] =$row;
+        $return[$row[$parent_col]]['child'] =array();
+     }
+     else {
+        $return[$row[$parent_col]]['child'][] =$row;
+     }
+  }
+  return $return;
+}
+
 function httpRequest($url) {
     $pattern = "/http...([0-9a-zA-Z-.]*).([0-9]*).(.*)/";
     preg_match($pattern,$url,$args);
@@ -262,5 +297,4 @@ if (!function_exists('array_column')) {
 
         return $resultArray;
     }
-
 }
