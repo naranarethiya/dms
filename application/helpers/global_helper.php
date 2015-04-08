@@ -148,19 +148,6 @@ function parent_child_array($array,$parent_col) {
   return $return;
 }
 
-function set_message($message,$type="error") {
-  $CI =& get_instance();
-  if($type=="error") {
-    $add=$CI->session->flashdata('error');
-    $set_message=$add."<li>".$message."</li>";
-    $CI->session->set_flashdata('error',$set_message);
-  }
-  else {
-    $add=$CI->session->flashdata('success');
-    $set_message=$add."<li>".$message."</li>";
-    $CI->session->set_flashdata('success',$set_message);
-  }
-}
 
 function redirect_back() {
   if(isset($_SERVER['HTTP_REFERER'])) {
@@ -214,59 +201,7 @@ function monthdiff($date1,$date2) {
   $interval = $datetime2->diff($datetime1);
   return $interval->format('%m');
 }
-/*
-* Create combobox from array
-*/
-function generate_combobox($name,$array,$key,$value,$selected=false,$other=false) {
-  if(empty($array)) {
-    $output = "<select name=\"{$name}\" ".$other.">";
-    $output .= "<option value=\"\">SELECT</option>";    
-    $output .= "</select>";
-  }
-  else{  
-    $output = "<select name=\"{$name}\" ".$other.">";
-    $output .= "<option value=\"\">SELECT</option>";
-    $keys=array_column($array,$key);
-	if(is_array($value)) {
-		$args=array();
-		$args[]="combine";
-		foreach($value as $val) {
-			$args[]=array_column($array,$val);
-		}
-		//$combined = array_map(function($a, $b) { return $a . ' , ' . $b; }, $array1, $array2));
-		
-		//$vals=array_column($array,$value);
-		
-		$vals=call_user_func_array('array_map',$args);
-		//$vals=array_column($array,$value);
-	}
-	else {
-		$vals=array_column($array,$value);
-	}
-    
-    $new_array=array_combine($keys,$vals);
 
-   foreach ($new_array as $key => $value) {
-      if(is_array($selected)) {
-        if (in_array($key,$selected)) {
-          $output .= "<option value=\"{$key}\" selected>{$value}</option>";
-        } else {
-            $output .= "<option value=\"{$key}\">{$value}</option>";
-        }
-      }
-      else {
-        if ($selected != false && $selected == $key) {
-          $output .= "<option value=\"{$key}\" selected>{$value}</option>";
-        } else {
-            $output .= "<option value=\"{$key}\">{$value}</option>";
-        }
-      }
-    }
-
-    $output .= "</select>";
-  }
-  return $output;
-}
 
 function combine() {
 	$args=func_get_args();
