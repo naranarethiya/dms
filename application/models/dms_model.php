@@ -10,7 +10,7 @@ class dms_model extends CI_Model {
 
 		if($user_id) {
 			$this->load->model('user_model');
-			$user=$this->user_model->get_users(array('user_id'=>$user_id));
+			$user=$this->user_model->get_users(array('users_id'=>$user_id));
 			$user_data=$user[0];
 		}
 		else {
@@ -44,7 +44,8 @@ class dms_model extends CI_Model {
 	function get_home_folder($user=false) {
 		if(!$user) {
 			$this->load->model('user_model');
-			$user=$this->user_model->get_users(array('user_id'=>$this->session->userdata('user_id')));
+			$user=$this->user_model->get_users(array('users_id'=>$this->session->userdata('users_id')));
+			print_last_query();
 			$user=$user[0];
 		}
 		return $user['home_folder'];
@@ -67,15 +68,11 @@ class dms_model extends CI_Model {
 		if($filter) {
 			apply_filter($filter);
 		}
-		if($join_category) {
-			$this->db->select('dms_document_files.*,dms_documents.*,group_concat(document_category.category) as document_category');
-			$this->db->join("document_category","dms_documents.document_id=document_category.document_id");
-		}
 		if($parent_folder) {
-			$this->db->where('dms_folders.parent_folder',$parent_folder);	
+			$this->db->where('dms_folders.parent_folder_id',$parent_folder);	
 		}
 		
-		$this->db->join("dms_document_files","dms_documents.document_id=dms_document_files.document_id");
+		//$this->db->join("dms_document","dms_documents.document_id=dms_document_files.document_id");
 		$rs=$this->db->get('dms_folders');
 		$result=$rs->result_array();
 		return $result;
@@ -94,7 +91,7 @@ class dms_model extends CI_Model {
 		$this->db->join("dms_document_files","dms_documents.document_id=dms_document_files.document_id");
 		$rs=$this->db->get('dms_documents');
 		$result=$rs->result_array();
-		$result=parent_child_array($result,$document_id);
+		$result=parent_child_array($result,'document_id');
 		return $result;
 	}
 	
@@ -113,12 +110,12 @@ class dms_model extends CI_Model {
 		}
 
 		/* The owner of the resource has unrestricted access */
-		if($resource['owner_id']==$user['user_id']) {
+		if($resource['owner_id']==$user['users_id']) {
 			return DMS_ALL;
 		}
 
 		/* check if resource or file is inside any folder which is owned by user */
-		$own_folders=$this->get_own_folders($user['user_id']);
+		$own_folders=$this->get_own_folders($user['users_id']);
 		foreach($own_folders as $folder) {
 			if(strpos('/'.$resource['id_path'],'/'.$folder.'/')!==false) {
 				return DMS_ALL;
@@ -131,13 +128,13 @@ class dms_model extends CI_Model {
 		}
 
 		/* Get the right defined by user */
-		if(array_key_exists($user['user_id'], $access_list["users"])) {
-			return $access_list["users"][$user['user_id']];
+		if(array_key_exists($user['users_id'], $access_list["users"])) {
+			return $access_list["users"][$user['users_id']];
 		}
 
 		$result=0;
 		/* Get the highest right defined by a group */
-		$user_groups=$this->user_model->get_usergroup_members(array('user_id'=>$user['user_id']));
+		$user_groups=$this->user_model->get_usergroup_members(array('user_id'=>$user['users_id']));
 		if(count($user_groups) > 0) {
 			$group_ids=array_column($user_groups,'group_id');
 			foreach ($access_list["groups"] as $group=>$rights) {
@@ -166,7 +163,10 @@ class dms_model extends CI_Model {
 	function get_access_list($resource,$user,$is_folder=false,$mode=false,$op='=') {
 		/* if document has inherited_access */
 		if($resource['inherited_access']=='1') {
-			return $this->get_access_list($resource['parent_folder_id']);
+			$filter=array('folder_id'=>$resource['parent_folder_id']);
+			$parent_folder=$this->get_folders(false,$filter);
+			$parent_folder=$parent_folder[0];
+			return $this->get_access_list($parent_folder,$user,true);
 		}
 
 		if($is_folder) {
@@ -178,15 +178,15 @@ class dms_model extends CI_Model {
 		if($mode) {
 			$this->db->where('access_code '.$op,$mode);
 		}
-		$this->db->get('dsm_folderdocument_access');
+		$rs=$this->db->get('dsm_folderdocument_access');
 		$access_array=$rs->result_array();
-		if (is_bool($access_list) && !$access_list) {
+		if (is_bool($access_array) && !$access_array) {
 			return false;
 		}
 
 		$access_list=array("users"=>array(),"groups"=>array());
 		foreach($access_array as $row) {
-			if($row['user_id']!='') {
+			if($row['users_id']!='') {
 				$access_list['users'][$row['user_id']]=$row['access_code'];
 			}
 			else {

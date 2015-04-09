@@ -176,12 +176,14 @@ function redirect_back() {
 }
 
 function dsm($var) {
-	if(is_array($var) || is_object($var)) {
-		echo "<pre>".print_r($var,true)."</pre>";
-	}
-	else {
-		echo "<pre>".$var."</pre>";
-	}
+  if(is_array($var) || is_object($var)) {
+    echo "<pre>".print_r($var,true)."</pre>";
+  }
+  else {
+    echo "<pre>".$var."</pre>";
+  }
+  $debug=debug_backtrace();
+  echo "<pre>".$debug[0]['file'].", line :".$debug[0]['line']."</pre>";
 }
 
 function print_last_query() {
