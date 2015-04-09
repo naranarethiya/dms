@@ -141,7 +141,9 @@ class dms_model extends CI_Model {
 		if($filter) {
 			apply_filter($filter);
 		}
+
 		$this->db->where('dms_documents.parent_folder_id',$parent_folder);
+
 		if($join_category) {
 			$this->db->select('dms_document_files.*,dms_documents.*,group_concat(document_category.category) as document_category');
 			$this->db->join("document_category","dms_documents.document_id=document_category.document_id");
@@ -151,6 +153,18 @@ class dms_model extends CI_Model {
 		$result=$rs->result_array();
 		$result=parent_child_array($result,'document_id');
 		return $result;
+	}
+
+	/* get document */
+
+	function get_document($filter=false) {
+		if($filter!='') {
+			apply_filter($filter);
+		}
+		$this->db->select('dms_documents.*,dms_document_files.*,dms_users.first_name,dms_users.last_name');
+		$this->db->join("dms_document_files","dms_documents.document_id=dms_document_files.document_id");
+		$this->db->join("dms_users","dms_documents.owner_id=dms_users.users_id");
+		return $this->db->get('dms_documents')->result_array();	
 	}
 	
 	/* return maximum access rights of user of file */

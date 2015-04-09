@@ -81,7 +81,7 @@ class file_manager extends CI_Controller {
 			'description'=>$description,
 			'inherited_access'=>'1',
 			'default_access'=>'0',
-			'real_path'=>$parent_folder[0]['folder_name'].'/'.$folder_name.'/',
+			'real_path'=>$parent_folder[0]['real_path'].$folder_name.'/',
 			'created_by'=>$this->session->userdata('users_id'),
 			'created_at'=>date('Y-m-d H:i:s')
 		);
@@ -90,11 +90,11 @@ class file_manager extends CI_Controller {
 		$folder_id=$this->db->insert_id();
 		if($res) {
 			/* updating id path of folder*/
-			$id_path=$parent_folder_id.'/'.$folder_id.'/';
+			$id_path=$parent_folder[0]['id_path'].$folder_id.'/';
 			$up_folderdata=array('id_path'=>$id_path);
 			$res4=$this->user_model->update_folder($up_folderdata,$folder_id);	
 
-			mkdir(DOCUMENT_ROOT.$parent_folder[0]['folder_name'].'/'.$folder_name);
+			mkdir(DOCUMENT_ROOT.$parent_folder[0]['real_path'].$folder_name);
 
 			set_message('Folder Created.','success');
 			redirect_back();			
@@ -228,12 +228,12 @@ class file_manager extends CI_Controller {
 		echo $li;
 	}
 
-	function upward_level() {
+	function file_view($file_id=false) {
+		$data['pageTitle']="File View";
+		$data['title']="File View";
 		$this->load->model('dms_model');
-		$folder_id=$this->input->post('folder_id');
-		/* Parent folder details */
-		$filter['WHERE']=array('folder_id'=>$folder_id);
-		$parent_folder=$this->dms_model->get_folders('',$filter);
-		return json_encode($parent_folder[0]['parent_folder_id']);		
+		$data['file']=$this->dms_model->get_document(array('dms_documents.document_id'=>$file_id));
+		$data['contant']=$this->load->view('file_view',$data,true);		
+		$this->load->view('master',$data);			
 	}
 }

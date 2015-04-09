@@ -198,7 +198,7 @@ class user extends CI_Controller {
 						'owner_id'=>$users_id,
 						'inherited_access'=>'1',
 						'default_access'=>$default_access,
-						'real_path'=>$folder_name.'/',
+						'real_path'=>$parent_folder[0]['real_path'].$folder_name.'/',
 						'created_by'=>$this->session->userdata('users_id'),
 						'created_at'=>date('Y-m-d H:i:s')
 					);
@@ -211,11 +211,11 @@ class user extends CI_Controller {
 						$res3=$this->user_model->update_user($up_userdata,$users_id);
 
 						/* updating id path of folder*/
-						$id_path=$folder_id.'/';
+						$id_path=$parent_folder[0]['id_path'].$folder_id.'/';
 						$up_folderdata=array('id_path'=>$id_path);
 						$res4=$this->user_model->update_folder($up_folderdata,$folder_id);	
 
-						mkdir(DOCUMENT_ROOT.$folder_name);
+						mkdir($parent_folder[0]['real_path'].$folder_name);
 					}		
 				}
 				else {		
