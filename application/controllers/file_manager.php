@@ -221,7 +221,7 @@ class file_manager extends CI_Controller {
 		$li="";
 		foreach ($folders as $row) {
 			$li.='<li>
-				<label data-path="'.$row['real_path'].'" onclick="change_folder('.$row['folder_id'].');">'.$row['folder_name'].'</label><input class="folder_checkbox" value="'.$row['folder_id'].'" type="checkbox" id="folder'.$row['folder_id'].'"/>
+				<label data-path="'.$row['real_path'].'" onclick="change_folder('.$row['folder_id'].');">'.$row['folder_name'].'</label><input class="folder_checkbox" value="'.$row['folder_id'].'" type="checkbox" name="folder_tree_checkbox" onclick="get_folder_tree(this)" id="folder'.$row['folder_id'].'"/>
 				<ol id="ol'.$row['folder_id'].'"></ol>
 			</li>';	
 		}

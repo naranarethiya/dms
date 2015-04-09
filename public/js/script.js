@@ -18,11 +18,25 @@ $(function(){
 	});
 });
 
+function get_folder_tree(ele) {
+	if($(ele).is(':checked')) {
+		var folder=$(ele).val();
+		var url=base_url+"file_manager/folder_tree/"+folder;
+		$.ajax({
+			"url":url,
+			"method":"POST",
+			"success": function(data) {
+				$('#ol'+folder).html(data);
+			}
+		});	
+	}
+}
+
 $(document).ready(function() {
 	/* for tree menu */
-	$('input[name="folder_tree_checkbox"]').click(function() {
-		if($(this).is(':checked')) {
-			var folder=$(this).val();
+	$('input[name="folder_treecheckbox"]').click(function() {
+		if($(ele).is(':checked')) {
+			var folder=$(ele).val();
 			var url=base_url+"file_manager/folder_tree/"+folder;
 			$.ajax({
 				"url":url,
@@ -33,6 +47,13 @@ $(document).ready(function() {
 			});	
 		}
 	});
+
+	/* for Breadcrumbs */
+	$(window).resize(function() {
+        ellipses1 = $("#breadcrumb_1 :nth-child(2)")
+        if ($("#bc1 a:hidden").length >0) {ellipses1.show()} else {ellipses1.hide()}       
+    })
+
 });
 
 /* ajax waiting */

@@ -328,6 +328,29 @@ function httpRequest($url) {
     return($in);
 }
 
+function create_breadcrumbs($real_path,$id_path) {
+  $CI =& get_instance();
+  $home_folder=$CI->session->userdata('home_folder');
+  $return="";
+  $return.='<div id="breadcrumb_1" class="btn-group btn-breadcrumb">';
+  $return.='<a href="#" onclick="change_folder('.$home_folder.');" class="btn btn-default"><i class="fa fa-home"></i></a>';
+  $return.='<div style="display:none" class="btn btn-default">...</div>';
+  if($real_path!='') {
+    $real_path=trim($real_path,"/");
+    $id_path=trim($id_path,"/");
+    $folders=explode('/',$real_path);
+    $ids=explode('/',$id_path);
+    //dsm($ids);die;
+    $i=0;
+    foreach($folders as $folder) {
+      $return.='<a href="#" onclick="change_folder('.$ids[$i].');" class="btn btn-default"><div>'.$folder.'</div></a>';
+      $i++;
+    }
+  } 
+  $return.="</div>";
+  return $return;
+}
+
 function getMimeIcon($file_name) { /* {{{ */
     // for extension use LOWER CASE only
     $icons = array();

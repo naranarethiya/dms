@@ -17,7 +17,10 @@
 					<div class="col-md-3 col-sm-4">
 						 <div class="box-header">
 						 	<h3>
-								<?php if(isset($folder_info) && $folder_info['real_path'] !='') { echo $folder_info['real_path']; } else { echo DOCUMENT_ROOT ; } ?>
+								<?php
+								//dsm($folder_info);die;
+									echo create_breadcrumbs($folder_info['real_path'],$folder_info['id_path']);
+								?>
 							</h3>
 						</div>
 						<div>
@@ -28,7 +31,7 @@
 								<?php foreach ($folder as $row) { ?>
 									<li>
 										<label onclick="change_folder(<?php echo $row['folder_id']; ?>);"><?php echo $row['folder_name']; ?></label>
-										<input type="checkbox" value="<?php echo $row['folder_id']; ?>" name="folder_tree_checkbox" id="folder<?php echo $row['folder_id']; ?>"/>
+										<input type="checkbox" onclick="get_folder_tree(this)" value="<?php echo $row['folder_id']; ?>" name="folder_tree_checkbox" id="folder<?php echo $row['folder_id']; ?>"/>
 										<ol id="ol<?php echo $row['folder_id']; ?>"></ol>
 									</li>	
 								<?php } ?>
