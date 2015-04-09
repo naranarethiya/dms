@@ -7,7 +7,7 @@ class login_model extends CI_Model
 		$username=htmlspecialchars($username,ENT_QUOTES);
 
 		$this->db->where("username",$username);
-		//$this->db->where('deleted_at IS NULL', null, false);
+		$this->db->where('disabled',0);
 		$row=$this->db->get('dms_users');
 		//if username exists
 		if($row->num_rows() > 0)
@@ -25,14 +25,6 @@ class login_model extends CI_Model
 					'home_folder'=>$row->home_folder,
 					'parent_user'=>$row->parent_user	
 				);
-/*				$date=date("Y-m-d H:r:s");
-				$login_history=array(
-					'uid'=>$row->uid,
-					'name'=>$row->email,
-					'datetime'=>$date
-				);
-				$this->db->insert('log_history',$login_history);*/
-				//dsm($session); die;
 				return $session;
 			} 
 			else 
@@ -47,7 +39,6 @@ class login_model extends CI_Model
 	}
 	public function check_old_password($old_pass,$uid)
 	{
-		print_r($this->session->all_userdata());
 		$sql="select * from dms_users where users_id=?";
 		$row=$this->db->query($sql,$uid);
 		if($row->num_rows() > 0)
