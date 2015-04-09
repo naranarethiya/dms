@@ -19,20 +19,6 @@ class file_manager extends CI_Controller {
 		else {
 			$data['extfolder']=$this->dms_model->listout_folder();
 		}
-		//dsm($data['extfolder']); die;
-		if(!empty($data['extfolder'])) {
-			$subfolders=array();
-			$folders=$data['extfolder']['folders'];
-			foreach ($folders as $value) {
-				$subfolders=$this->dms_model->get_folders($value['folder_id']);
-			}
-			$new_arr=array();
-			foreach ($subfolders as $key => $value) {
-				$new_arr[$value['parent_folder_id']]=$value;
-			}
-			$data['extfolder']['subfolder']=$new_arr;
-		}
-		//dsm($data['extfolder']); die;
 		$data['contant']=$this->load->view('view_data',$data,true);		
 		$this->load->view('master',$data);		
 	}
@@ -213,4 +199,22 @@ class file_manager extends CI_Controller {
 			redirect_back();
 		}	
 	}
+
+	function folder_tree($folder_id=false) {
+		$this->load->model('dms_model');
+		if(!$folder_id) {
+			$folder_id=$this->session->userdata('home_folder');
+		}
+
+		$folders=$this->dms_model->list_folders($folder_id);
+		$li="";
+		foreach ($folders as $row) {
+			$li.='<li>
+				<label data-path="'.$row['real_path'].'" onclick="change_folder('.$row['folder_id'].');">'.$row['folder_name'].'</label><input class="folder_checkbox" value="'.$row['folder_id'].'" type="checkbox" id="folder'.$row['folder_id'].'"/>
+				<ol id="ol'.$row['folder_id'].'"></ol>
+			</li>';	
+		}
+		echo $li;
+	}
+
 }
