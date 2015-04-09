@@ -17,9 +17,9 @@
 				<div class="row">
 					<div class="col-md-3 col-sm-4">
 						 <div class="box-header">
-						 	<h3>
-								<?php if(isset($folder_info) && $folder_info['real_path'] !='') { echo $folder_info['real_path']; } else { echo DOCUMENT_ROOT ; } ?>
-							</h3>
+						 	<h5>
+								<?php if(isset($folder_info) && $folder_info['real_path'] !='') { echo DOCUMENT_ROOT.$folder_info['real_path']; } else { echo DOCUMENT_ROOT ; } ?>
+							</h5>
 						</div>
 						<div>
 						<ul class="nav nav-pills nav-stacked">
@@ -105,7 +105,9 @@
                                         <td class="subject">
                                         	<?php echo "<img src='".base_url().ICON_PATH.'folder.png'."'/>"; ?>
 											&nbsp;&nbsp;
-											<a href="<?php echo base_url().'file_manager/index/'.$folders['folder_id']; ?>"><?php echo $folders['folder_name']; ?></a>
+											<a href="<?php echo base_url().'file_manager/index/'.$folders['folder_id']; ?>">
+												<?php echo $folders['folder_name']; ?>
+											</a>
 										</td>
 										<td class="small-col"></td>
 										<td class="small-col"></td>
@@ -119,7 +121,7 @@
                                         <td class="subject">
                                         	<?php echo "<img src='".getMimeIcon($file['file_name'])."'/>"; ?>
 											&nbsp;&nbsp;
-											<a href="#"><?php echo $file['file_name']; ?></a>&nbsp;&nbsp;
+											<a href="<?php echo base_url().'file_manager/file_view/'.$file['document_id']; ?>"><?php echo $file['file_name']; ?></a>&nbsp;&nbsp;
 											<small class="label label-danger"><?php echo $file['keywords']; ?></small>
 										</td>
 										<td class="small-col"><?php echo $file['file_extension'];?></td>
