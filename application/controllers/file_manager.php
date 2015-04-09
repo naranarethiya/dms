@@ -13,8 +13,19 @@ class file_manager extends CI_Controller {
 		$data['title']="FileManager";
 		$this->load->model('dms_model');
 		if($folder_id!='') {
-			$data['extfolder']=$this->dms_model->listout_folder($folder_id);
-			$data['folder_id']=$folder_id;
+			$user=$this->session->all_userdata('users_id');
+			$folder=$this->dms_model->get_folders('',array('folder_id'=>$folder_id));
+			
+			$access=$this->dms_model->get_access_mode($folder,$user,true);
+			if($access>='1') {
+				$data['extfolder']=$this->dms_model->listout_folder($folder_id);
+				$data['folder_id']=$folder_id;
+				$data['folder_info']=$folder[0];
+			}
+			else {
+				set_message('Access deined'.$folder_id);
+				redirect_back();
+			}
 		}
 		else {
 			$data['extfolder']=$this->dms_model->listout_folder();
@@ -212,5 +223,14 @@ class file_manager extends CI_Controller {
 			set_message('something went wrong'.$this->db->_error_message);
 			redirect_back();
 		}	
+	}
+
+	function upward_level() {
+		$this->load->model('dms_model');
+		$folder_id=$this->input->post('folder_id');
+		/* Parent folder details */
+		$filter['WHERE']=array('folder_id'=>$folder_id);
+		$parent_folder=$this->dms_model->get_folders('',$filter);
+		return json_encode($parent_folder[0]['parent_folder_id']);		
 	}
 }
