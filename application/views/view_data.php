@@ -1,6 +1,12 @@
 <?php
 	$folder=$extfolder['folders'];
 	$files=$extfolder['files'];
+	if(isset($folder_info) && $folder_info['real_path'] !='') {
+		$up_folder=$folder_info['parent_folder_id'];
+	}
+	else {
+		$up_folder="1";
+	}
 ?>
 <!-- File folder view BEGIN -->
 <div class="mailbox row">
@@ -10,8 +16,9 @@
 				<div class="row">
 					<div class="col-md-3 col-sm-4">
 						 <div class="box-header">
-							<i class="fa fa-folder"></i>
-							<h3 class="box-title">Folders</h3>
+						 	<h3>
+								<?php if(isset($folder_info) && $folder_info['real_path'] !='') { echo $folder_info['real_path']; } else { echo DOCUMENT_ROOT ; } ?>
+							</h3>
 						</div>
 						<div>
 						<ul class="nav nav-pills nav-stacked">
@@ -65,7 +72,11 @@
 								</form>
 							</div>
 						</div><!-- /.row -->
-
+						<div class="row pad">
+							<a href="#" class="fa fa-fw fa-refresh" onclick="window.location.reload( true );" data-toggle="tooltip" data-placement="top" title="Refresh"></a>
+							<a href="<?php echo base_url()."file_manager/index/".$up_folder;?>" class="fa fa-fw fa-arrow-up" data-toggle="tooltip" data-placement="top" title="Up-Level"></a>
+							<a href="#" class="fa fa-fw fa-arrow-left" onclick="window.history.back();" data-toggle="tooltip" data-placement="top" title="Back"></a>
+						</div>	
 						<div class="table-responsive">
 							<table class='table table-mailbox'>
 								<thead>
@@ -155,5 +166,16 @@ function create_file() {
 	get_modaldata('New File',url);
 }
 
-
+function up_level() {
+	var folder_id=$('#parent_folder_id').val();
+	$.ajax({
+		url     : base_url+"file_manager/upward_level/",
+		type    : 'POST',
+		data    : {'folder_id':folder_id},
+		success : function(data){
+			var url=base_url+"file_manager/index/"+data;
+			window.open(url,"_self");				
+		}
+	});
+}
 </script>
