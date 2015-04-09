@@ -1,11 +1,12 @@
 <?php
-	$folder=$extfolder['folders'];
-	$files=$extfolder['files'];
 	if(isset($folder_info) && $folder_info['real_path'] !='') {
 		$up_folder=$folder_info['parent_folder_id'];
 	}
 	else {
 		$up_folder="1";
+	}
+	if(isset($file)) {
+		$file=$file[0];
 	}
 ?>
 <!-- File folder view BEGIN -->
@@ -16,24 +17,44 @@
 				<div class="row">
 					<div class="col-md-3 col-sm-4">
 						 <div class="box-header">
-								<?php
-								//dsm($folder_info);die;
-									echo create_breadcrumbs($folder_info['real_path'],$folder_info['id_path']);
-								?>
+						 	<h5>
+								Document Information
+							</h5>
 						</div>
 						<div>
-						<ul class="nav nav-pills nav-stacked">
-							<li class="header"></li>
-						</ul>
-							<ol class="tree">
-								<?php foreach ($folder as $row) { ?>
-									<li>
-										<label onclick="change_folder(<?php echo $row['folder_id']; ?>);"><?php echo $row['folder_name']; ?></label>
-										<input type="checkbox" onclick="get_folder_tree(this)" value="<?php echo $row['folder_id']; ?>" name="folder_tree_checkbox" id="folder<?php echo $row['folder_id']; ?>"/>
-										<ol id="ol<?php echo $row['folder_id']; ?>"></ol>
-									</li>	
-								<?php } ?>
-							</ol>						
+							<ul class="nav nav-pills nav-stacked">
+								<li class="header"></li>
+							</ul>
+							<div class="well">
+								<table class="table-condensed">
+									<tbody>
+										<tr>
+											<td>ID:</td>
+											<td><?php echo $file['document_file_id'];?></td>
+										</tr>
+										<tr>
+											<td>Owner:</td>
+											<td><?php echo $file['first_name'].' '.$file['last_name'];?></td>
+										</tr>
+										<tr>
+											<td>Access:</td>
+											<td><?php if($file['inherited_access']=="1") { echo "Inherited"; }?></td>
+										</tr>
+										<tr>
+											<td>Size:</td>
+											<td><?php echo $file['file_size'].'KB';?></td>
+										</tr>
+										<tr>
+											<td>Keyword:</td>
+											<td><?php echo $file['keywords'];?></td>
+										</tr>										
+										<tr>
+											<td>Created At:</td>
+											<td><?php echo dateformat($file['created_at']);?></td>
+										</tr>																																								
+									</tbody>
+								</table>
+							</div>
 						</div>
 					</div><!-- /.col (LEFT) -->
 					<div class="col-md-9 col-sm-8">
@@ -78,55 +99,32 @@
 							<a href="<?php echo base_url()."file_manager/index/".$up_folder;?>" class="fa fa-fw fa-arrow-up" data-toggle="tooltip" data-placement="top" title="Up-Level"></a>
 							<a href="#" class="fa fa-fw fa-arrow-left" onclick="window.history.back();" data-toggle="tooltip" data-placement="top" title="Back"></a>
 						</div>	
-						<div class="table-responsive">
-							<table class='table table-mailbox'>
-								<thead>
-									<tr>
-										<th>#</th>
-										<th>Name</th> 
-										<th>Type</th> 
-										<th>Size</th> 
-										<th>Date</th> 
-										<th>Action</th>
-									</tr>
-								</thead>
+						<div class="well">
+							<table class="table-condensed">
 								<tbody>
-									<?php foreach ($folder as $folders) { ?>
 									<tr>
-										<td class="small-col"><input type="checkbox" class="selectAll"/></td>
-                                        <td class="subject">
-                                        	<?php echo "<img src='".base_url().ICON_PATH.'folder.png'."'/>"; ?>
-											&nbsp;&nbsp;
-											<a href="<?php echo base_url().'file_manager/index/'.$folders['folder_id']; ?>">
-												<?php echo $folders['folder_name']; ?>
-											</a>
-										</td>
-										<td class="small-col"></td>
-										<td class="small-col"></td>
-                                        <td class="name"><?php echo dateformat($folders['created_at']);?></td>
-										<td>&nbsp;&nbsp;</td>
+										<td width="25%"></td>
+										<td width="25%">File</td>
+										<td width="25%">Comment</td>
+										<td width="25%">Action</td>
 									</tr>
-									<?php } ?>									
-									<?php foreach ($files as $file) { ?>
 									<tr>
-										<td class="small-col"><input type="checkbox" class="selectAll"/></td>
-                                        <td class="subject">
-                                        	<?php echo "<img src='".getMimeIcon($file['file_name'])."'/>"; ?>
-											&nbsp;&nbsp;
-											<a href="<?php echo base_url().'file_manager/file_view/'.$file['document_id']; ?>"><?php echo $file['file_name']; ?></a>&nbsp;&nbsp;
-											<small class="label label-danger"><?php echo $file['keywords']; ?></small>
-										</td>
-										<td class="small-col"><?php echo $file['file_extension'];?></td>
-										<td class="small-col"><?php echo $file['file_size'];?></td>
-                                        <td class="name"><?php echo dateformat($file['created_at']);?></td>
+										<td><?php echo "<img src='".getMimeIcon($file['file_name'])."' width='50' height='50'/>"; ?></td>
 										<td>
-											<i class="fa fa-fw fa-download"></i>&nbsp;&nbsp;
-											<i class="fa fa-fw fa-edit"></i>
+											<?php echo $file['file_name'];?><br/>
+											<?php echo 'Version:'.$file['file_version'];?><br/>
+											<?php echo $file['file_size'].'KB';?><br/>
+											<?php echo 'Uploaded by'.$file['first_name'].' '.$file['last_name'];?><br/>
+											<?php echo dateformat($file['created_at']);?>
 										</td>
-									</tr>
-									<?php } ?>
+										<td><?php echo $file['description'];?></td>
+										<td>
+											<i class="fa fa-fw fa-download"></i>Download<br/>
+											<i class="fa fa-fw fa-external-link"></i>View Online
+										</td>
+									</tr>																																							
 								</tbody>
-							</table>							
+							</table>						
 						</div><!-- /.table-responsive -->
 					</div><!-- /.col (RIGHT) -->
 				</div><!-- /.row -->
@@ -167,5 +165,18 @@ function create_file() {
 	var parent_folder_id=$('#parent_folder_id').val();
 	var url=base_url+"file_manager/create_file/"+parent_folder_id;
 	get_modaldata('New File',url);
+}
+
+function up_level() {
+	var folder_id=$('#parent_folder_id').val();
+	$.ajax({
+		url     : base_url+"file_manager/upward_level/",
+		type    : 'POST',
+		data    : {'folder_id':folder_id},
+		success : function(data){
+			var url=base_url+"file_manager/index/"+data;
+			window.open(url,"_self");				
+		}
+	});
 }
 </script>

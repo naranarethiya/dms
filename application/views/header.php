@@ -1,5 +1,5 @@
 <header class="header">
-	<a href="<?php echo base_url(); ?>" class="logo">
+	<a href="<?php echo base_url().'dashboard'; ?>" class="logo">
 		<?php
 			echo "DMS";
 		?>		

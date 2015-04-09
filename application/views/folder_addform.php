@@ -16,7 +16,7 @@
 			</div>
 			<div class="col-md-6">
 				<label>New Folder Name <span class="text-danger">*</span></label>
-				<input type="text" class="form-control" name="folder_name" id="folder_name" required palceholder="No special character" pattern="^[a-zA-Z][a-zA-Z0-9-_\.]{1,20}$"/>
+				<input type="text" class="form-control" name="folder_name" id="folder_name" required palceholder="No special character" pattern="^[a-zA-Z][a-zA-Z0-9-_\. ]{1,20}$"/>
 			</div>				
 		</div>	
 		<div class="col-md-12">
