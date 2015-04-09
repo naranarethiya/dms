@@ -1,6 +1,5 @@
 <?php
-	$folder=$extfolder['folders']; 
-	$subfolder=$extfolder['subfolder'];
+	$folder=$extfolder['folders'];
 	$files=$extfolder['files'];
 	if(isset($folder_info) && $folder_info['real_path'] !='') {
 		$up_folder=$folder_info['parent_folder_id'];
@@ -29,16 +28,8 @@
 								<?php foreach ($folder as $row) { ?>
 									<li>
 										<label onclick="change_folder(<?php echo $row['folder_id']; ?>);"><?php echo $row['folder_name']; ?></label>
-										<input type="checkbox" id="folder<?php echo $row['folder_id']; ?>"/>
-										<?php if(isset($subfolder[$row['folder_id']])) { 
-											echo "<ol>";
-											foreach ($subfolder as $key) {
-										?>
-											<li>
-											<label for="folder<?php echo $key['folder_id']; ?>" onclick="change_folder(<?php echo $key['folder_id']; ?>);"><?php echo $key['folder_name']; ?></label>
-											<input type="checkbox" id="folder<?php echo $key['folder_id']; ?>"/>	
-											</li>										
-										<?php } echo "</ol>"; } ?>
+										<input type="checkbox" value="<?php echo $row['folder_id']; ?>" name="folder_tree_checkbox" id="folder<?php echo $row['folder_id']; ?>"/>
+										<ol id="ol<?php echo $row['folder_id']; ?>"></ol>
 									</li>	
 								<?php } ?>
 							</ol>						

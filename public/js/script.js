@@ -18,6 +18,22 @@ $(function(){
 	});
 });
 
+$(document).ready(function() {
+	/* for tree menu */
+	$('input[name="folder_tree_checkbox"]').click(function() {
+		if($(this).is(':checked')) {
+			var folder=$(this).val();
+			var url=base_url+"file_manager/folder_tree/"+folder;
+			$.ajax({
+				"url":url,
+				"method":"POST",
+				"success": function(data) {
+					$('#ol'+folder).html(data);
+				}
+			});	
+		}
+	});
+});
 
 /* ajax waiting */
 function loading() {
