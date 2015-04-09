@@ -17,9 +17,28 @@ class dms_model extends CI_Model {
 			$user_data=$this->session->all_userdata();	
 		}
 		
+		
+		$data['folders']=$this->list_folders($folder_id,$user_id);
+		$data['files']=$this->list_documents($folder_id,$user_id);
+		return $data;
+	}
+
+	function list_folders($folder_id=false,$user_id=false) {
+		/* set folder id */
+		if(!$folder_id) {
+			$folder_id=$this->get_home_folder();
+		}
+
+		if($user_id) {
+			$this->load->model('user_model');
+			$user=$this->user_model->get_users(array('users_id'=>$user_id));
+			$user_data=$user[0];
+		}
+		else {
+			$user_data=$this->session->all_userdata();	
+		}
+		
 		$folders=$this->get_folders($folder_id);
-		$files=$this->get_documents($folder_id);
-		$valid_files=array();
 		$valid_folders=array();
 
 		foreach($folders as $folder) {
@@ -28,6 +47,26 @@ class dms_model extends CI_Model {
 				$valid_folders[]=$folder;
 			}
 		}
+		return $valid_folders;
+	}
+
+	function list_documents($folder_id=false,$user_id=false) {
+		/* set folder id */
+		if(!$folder_id) {
+			$folder_id=$this->get_home_folder();
+		}
+
+		if($user_id) {
+			$this->load->model('user_model');
+			$user=$this->user_model->get_users(array('users_id'=>$user_id));
+			$user_data=$user[0];
+		}
+		else {
+			$user_data=$this->session->all_userdata();	
+		}
+		
+		$files=$this->get_documents($folder_id);
+		$valid_files=array();
 
 		foreach($files as $file) {
 			$access_mode=$this->get_access_mode($file,$user_data);
@@ -35,10 +74,9 @@ class dms_model extends CI_Model {
 				$valid_files[]=$file;
 			}
 		}
-		$data['folders']=$valid_folders;
-		$data['files']=$valid_files;
-		return $data;
+		return $valid_files;
 	}
+
 
 	/* return home folder of user */
 	function get_home_folder($user=false) {

@@ -23,7 +23,7 @@ class login extends CI_Controller {
 		$data=$this->login_model->app_login($username, $password);
 		
 		if($data==""){
-			$this->session->set_flashdata("error","Username or password is wrong");
+			set_message("Username or password is wrong");
 			redirect(base_url());
 		}
 		else {
@@ -45,15 +45,15 @@ class login extends CI_Controller {
 		$rs=$this->login_model->change_password($opasssword,$npasssword,$ncpasssword);	
 	
 		if($rs=="Success") {
-			$this->session->set_flashdata("success","Password Change Successfully");
+			set_message("Password Change Successfully","success");
 			redirect(base_url()."dashboard");
 		}
 		elseif($rs=="Confirm fail") {
-			$this->session->set_flashdata("error","Confirm Password Done Not Match");
+			set_message("Confirm Password Done Not Match");
 			redirect(base_url()."dashboard");
 		}
 		elseif($rs=="Old fail") {
-			$this->session->set_flashdata("error","Old Password Is Wrong");
+			set_message("Old Password Is Wrong","success");
 			redirect(base_url()."dashboard");
 		}
 	}	

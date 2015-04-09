@@ -17,6 +17,7 @@
     <body class="bg-black">
 		<div class="form-box" id="login-box">
 			<div class="header">Sign In</div>
+			<?php $this->load->view("show_msg"); ?>
 			<?php
 				echo form_open('login/check', array('name' => 'loginform'));    
 			?>
