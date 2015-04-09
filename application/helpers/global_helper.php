@@ -328,6 +328,87 @@ function httpRequest($url) {
     return($in);
 }
 
+function getMimeIcon($file_name) { /* {{{ */
+    // for extension use LOWER CASE only
+    $icons = array();
+    $icons["txt"]  = "txt.png";
+    $icons["text"] = "txt.png";
+    $icons["doc"]  = "word.png";
+    $icons["dot"]  = "word.png";
+    $icons["docx"] = "word.png";
+    $icons["dotx"] = "word.png";
+    $icons["rtf"]  = "document.png";
+    $icons["xls"]  = "excel.png";
+    $icons["xlt"]  = "excel.png";
+    $icons["xlsx"] = "excel.png";
+    $icons["xltx"] = "excel.png";
+    $icons["ppt"]  = "powerpoint.png";
+    $icons["pot"]  = "powerpoint.png";
+    $icons["pptx"] = "powerpoint.png";
+    $icons["potx"] = "powerpoint.png";
+    $icons["exe"]  = "binary.png";
+    $icons["html"] = "html.png";
+    $icons["htm"]  = "html.png";
+    $icons["gif"]  = "image.png";
+    $icons["jpg"]  = "image.png";
+    $icons["jpeg"] = "image.png";
+    $icons["bmp"]  = "image.png";
+    $icons["png"]  = "image.png";
+    $icons["tif"]  = "image.png";
+    $icons["tiff"] = "image.png";
+    $icons["log"]  = "log.png";
+    $icons["midi"] = "midi.png";
+    $icons["pdf"]  = "pdf.png";
+    $icons["wav"]  = "sound.png";
+    $icons["mp3"]  = "sound.png";
+    $icons["c"]    = "source_c.png";
+    $icons["cpp"]  = "source_cpp.png";
+    $icons["h"]    = "source_h.png";
+    $icons["java"] = "source_java.png";
+    $icons["py"]   = "source_py.png";
+    $icons["tar"]  = "tar.png";
+    $icons["gz"]   = "gz.png";
+    $icons["7z"]   = "gz.png";
+    $icons["bz"]   = "gz.png";
+    $icons["bz2"]  = "gz.png";
+    $icons["tgz"]  = "gz.png";
+    $icons["zip"]  = "gz.png";
+    $icons["rar"]  = "gz.png";
+    $icons["mpg"]  = "video.png";
+    $icons["avi"]  = "video.png";
+    $icons["tex"]  = "tex.png";
+    $icons["ods"]  = "x-office-spreadsheet.png";
+    $icons["ots"]  = "x-office-spreadsheet.png";
+    $icons["sxc"]  = "x-office-spreadsheet.png";
+    $icons["stc"]  = "x-office-spreadsheet.png";
+    $icons["odt"]  = "x-office-document.png";
+    $icons["ott"]  = "x-office-document.png";
+    $icons["sxw"]  = "x-office-document.png";
+    $icons["stw"]  = "x-office-document.png";
+    $icons["odp"]  = "ooo_presentation.png";
+    $icons["otp"]  = "ooo_presentation.png";
+    $icons["sxi"]  = "ooo_presentation.png";
+    $icons["sti"]  = "ooo_presentation.png";
+    $icons["odg"]  = "ooo_drawing.png";
+    $icons["otg"]  = "ooo_drawing.png";
+    $icons["sxd"]  = "ooo_drawing.png";
+    $icons["std"]  = "ooo_drawing.png";
+    $icons["odf"]  = "ooo_formula.png";
+    $icons["sxm"]  = "ooo_formula.png";
+    $icons["smf"]  = "ooo_formula.png";
+    $icons["mml"]  = "ooo_formula.png";
+
+    $icons["default"] = "default.png";
+    $icon_path=base_url().ICON_PATH;
+    $ext = strtolower(substr($file_name, strrpos($file_name, '.') + 1));
+    if (isset($icons[$ext])) {
+      return $icon_path.$icons[$ext];
+    }
+    else {
+      return $icon_path.$icons["default"];
+    }
+  }
+
 function send_sms($mobile_no,$message) {
     $message=urlencode($message);
     $url=SMSAPP_API_SENDSMS."securekey=".SMSAPP_SECUREKEY."&token=".SMSAPP_TOKEN."&to=".$mobile_no."&message=".$message;
