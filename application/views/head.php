@@ -14,6 +14,7 @@
 <link href="<?php echo base_url().'public/css/ionicons.min.css'; ?>" rel="stylesheet" type="text/css" />
 <link href="<?php echo base_url().'public/css/AdminLTE.css'; ?>" rel="stylesheet" type="text/css" />
 <link href="<?php echo base_url().'public/datepicker/datepicker.css'; ?>" rel="stylesheet" type="text/css" />
+<link href="<?php echo base_url().'public/chosen/chosen.min.css'; ?>" rel="stylesheet" type="text/css" />
 <link href="<?php echo base_url().'public/css/datatables/dataTables.bootstrap.css'; ?>" rel="stylesheet" type="text/css"/>
 <?php
 	/*to load css in header pass url of css in $loadCss variable as array*/
@@ -39,6 +40,7 @@
 	<script src="<?php echo base_url().'public/js/bootstrap.min.js'; ?>" type="text/javascript"></script>
 	<script src="<?php echo base_url().'public/js/app.js'; ?>" type="text/javascript"></script>
 	<script src="<?php echo base_url().'public/datepicker/bootstrap-datepicker.js'; ?>" type="text/javascript"></script>	
+  	<script src="<?php echo base_url()."public/chosen/chosen.jquery.min.js"; ?>"></script>
   	<script src="<?php echo base_url()."public/js/datatables/jquery.dataTables.min.js"; ?>"></script>
 	<?php 
 		/* to load javascript file pass url of css in $loadJs variable as array */

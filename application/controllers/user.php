@@ -75,6 +75,7 @@ class user extends CI_Controller {
 		$users_id=$this->input->post('users_id');
 		$create_folder=$this->input->post('create_folder');
 		/* Including Validation Library */
+		$this->load->model('dms_model');
 		$this->load->model('user_model');
 		$this->load->library('form_validation');
 		$this->form_validation->set_error_delimiters('<div class="error">', '</div>');
@@ -126,6 +127,7 @@ class user extends CI_Controller {
 				/* Permission editted to user */
 				$filter['WHERE']=array('user_id'=>$users_id);
 				$permission_id=$this->user_model->get_user_permission($filter);
+				
 				$permission_id=array_column($permission_id,'user_permissionlist_id');
 				foreach ($permission as $key => $value) {
 					if(in_array($value,$permission_id)) {
@@ -186,7 +188,7 @@ class user extends CI_Controller {
 				}
 				/* Parent folder details */
 				$filter['WHERE']=array('owner_id'=>$this->session->userdata('parent_user'));
-				$parent_folder=$this->user_model->get_folders($filter);
+				$parent_folder=$this->dms_model->get_folders('',$filter);
 
 				/* Adding new folder */
 				if($create_folder=='1') {

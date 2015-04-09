@@ -46,6 +46,7 @@ function get_modaldata(title,url) {
 	})
 	.done(function(data) {
 		load_popup(title,data);
+		$('.chosen-container').css('width','250px');
 	})
 	.fail(function(jqXHR, textStatus) {
 		alert( "Request failed: " + textStatus );

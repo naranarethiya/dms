@@ -45,7 +45,7 @@ class dms_model extends CI_Model {
 		if(!$user) {
 			$this->load->model('user_model');
 			$user=$this->user_model->get_users(array('users_id'=>$this->session->userdata('users_id')));
-			print_last_query();
+			//print_last_query();
 			$user=$user[0];
 		}
 		return $user['home_folder'];
