@@ -1,3 +1,8 @@
+<?php
+	$folder=$extfolder['folders']; 
+	$subfolder=$extfolder['subfolder'];
+	$files=$extfolder['files'];
+?>
 <!-- File folder view BEGIN -->
 <div class="mailbox row">
 	<div class="col-xs-12">
@@ -14,16 +19,16 @@
 							<li class="header"></li>
 						</ul>
 							<ol class="tree">
-								<?php foreach ($extfolder as $row) { ?>
+								<?php foreach ($folder as $row) { ?>
 									<li>
-										<label onclick="list(<?php echo $row['folder_id']; ?>);"><?php echo $row['folder_name']; ?></label>
+										<label onclick="change_folder(<?php echo $row['folder_id']; ?>);"><?php echo $row['folder_name']; ?></label>
 										<input type="checkbox" id="folder<?php echo $row['folder_id']; ?>"/>
 										<?php if(isset($subfolder[$row['folder_id']])) { 
 											echo "<ol>";
 											foreach ($subfolder as $key) {
 										?>
 											<li>
-											<label for="folder<?php echo $key['folder_id']; ?>" onclick="list(<?php echo $key['folder_id']; ?>);"><?php echo $key['folder_name']; ?></label>
+											<label for="folder<?php echo $key['folder_id']; ?>" onclick="change_folder(<?php echo $key['folder_id']; ?>);"><?php echo $key['folder_name']; ?></label>
 											<input type="checkbox" id="folder<?php echo $key['folder_id']; ?>"/>	
 											</li>										
 										<?php } echo "</ol>"; } ?>
@@ -54,8 +59,9 @@
 									</ul>
 								</div>							
 								<!-- Action button -->
-								<a href="#" onclick="get_modaldata('New Folder','<?php echo base_url().'file_manager/create_folder'; ?>')" class="btn btn-sm btn-primary"><i class="fa fa-folder"></i><span>&nbsp;&nbsp;New Folder</span></a>
-								<a href="#" class="btn btn-primary btn-sm"><i class="fa fa-file"></i><span>&nbsp;&nbsp;New File</span></a>	
+								<input type="hidden" id="parent_folder_id" value="<?php if(isset($folder_id)) { echo $folder_id; } else { echo $this->session->userdata('home_folder'); }?>"/>
+								<a href="#" onclick="create_folder()" class="btn btn-sm btn-primary"><i class="fa fa-folder"></i><span>&nbsp;&nbsp;New Folder</span></a>
+								<a href="#" onclick="create_file()" class="btn btn-primary btn-sm"><i class="fa fa-file"></i><span>&nbsp;&nbsp;New File</span></a>	
 							</div>
 							<div class="col-sm-6 search-form">
 								<form action="#" class="text-right">
@@ -82,20 +88,24 @@
 									</tr>
 								</thead>
 								<tbody>
+									<?php foreach ($files as $file) { ?>
 									<tr>
 										<td class="small-col"><input type="checkbox" class="selectAll"/></td>
                                         <td class="subject">
-											<img src="<?php echo base_url().'public/img/img.gif';?>" />&nbsp;&nbsp;<a href="#">Panda.jpg</a>&nbsp;&nbsp;
-											<small class="label label-danger">animal</small>
+                                        	<?php echo "<img src='".base_url()."public/img/jpg.jpg'/>"; ?>
+											&nbsp;&nbsp;
+											<a href="#"><?php echo $file['file_name']; ?></a>&nbsp;&nbsp;
+											<small class="label label-danger"><?php echo $file['keywords']; ?></small>
 										</td>
-										<td class="small-col"><?php echo "JPG";?></td>
-										<td class="small-col"><?php echo "410 kb";?></td>
-                                        <td class="name"><?php echo date('Y-m-d H:i:s');?></td>
+										<td class="small-col"><?php echo $file['file_extension'];?></td>
+										<td class="small-col"><?php echo $file['file_size'];?></td>
+                                        <td class="name"><?php echo dateformat($file['created_at']);?></td>
 										<td>
 											<i class="fa fa-fw fa-download"></i>&nbsp;&nbsp;
 											<i class="fa fa-fw fa-edit"></i>
 										</td>
 									</tr>
+									<?php } ?>
 								</tbody>
 							</table>							
 						</div><!-- /.table-responsive -->
@@ -121,18 +131,22 @@ $(document).ready(function(){
 	});
 });
 
-function list(ele) {
+function change_folder(ele) {
+	$('#parent_folder_id').val(ele);
 	var folder_id=ele;
-	if(folder_id!='') {
-		$.ajax({
-			  url     : base_url+"file_manager/get_list/",
-			  type    : 'POST',
-			  data    : {'id':folder_id},
-			  success : function(data){
-					
-				}
-			}
-		});		
-	}
+	var url=base_url+"file_manager/index/"+folder_id;
+	window.open(url,"_self");
+}
+
+function create_folder() {
+	var parent_folder_id=$('#parent_folder_id').val();
+	var url=base_url+"file_manager/create_folder/"+parent_folder_id;
+	get_modaldata('New Folder',url);
+}
+
+function create_file() {
+	var parent_folder_id=$('#parent_folder_id').val();
+	var url=base_url+"file_manager/create_file/"+parent_folder_id;
+	get_modaldata('New File',url);
 }
 </script>

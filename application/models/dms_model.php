@@ -40,6 +40,27 @@ class dms_model extends CI_Model {
 		return $data;
 	}
 
+	/* get user keyword */
+	function get_user_keyword($filter=false) {
+		if($filter) {
+			apply_filter($filter);
+		}
+		$rs=$this->db->get('dsm_keywords');
+		return $rs->result_array();		
+	}
+
+	/* adding document data*/
+
+	function add_document_data($document_data) {
+		return $this->db->insert('dms_documents',$document_data);
+	}
+
+	/* adding document file data*/
+
+	function add_documentfile_data($documentfile_data) {
+		return $this->db->insert('dms_document_files',$documentfile_data);
+	}
+	
 	/* return home folder of user */
 	function get_home_folder($user=false) {
 		if(!$user) {
