@@ -194,7 +194,7 @@ class user extends CI_Controller {
 				if($create_folder=='1') {
 					$folder_data=array(
 						'folder_name'=>$folder_name,
-						'parent_folder_id'=>$parent_folder[0]['folder_id'],
+						'parent_folder_id'=>$this->session->userdata('home_folder'),
 						'owner_id'=>$users_id,
 						'inherited_access'=>'1',
 						'default_access'=>$default_access,
@@ -220,7 +220,7 @@ class user extends CI_Controller {
 				}
 				else {		
 					/* updating home folder of user */
-					$up_userdata=array('home_folder'=>$parent_folder[0]['folder_id']);
+					$up_userdata=array('home_folder'=>$this->session->userdata('home_folder'));
 					$res3=$this->user_model->update_user($up_userdata,$users_id);
 				}
 
