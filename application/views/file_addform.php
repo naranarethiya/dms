@@ -5,7 +5,13 @@
 			<div class="col-md-6">
 				<label>Owner's Id <span class="text-danger">*</span></label>
 	 			<?php 
-					echo generate_combobox('owner_id',$owner,'users_id','username','','class="form-control chosen" id="owner_id" required');
+	 				if($this->session->userdata('users_id')!='') {
+	 					$option=$this->session->userdata('users_id');
+	 				}
+	 				else {
+	 					$option='';
+	 				}
+					echo generate_combobox('owner_id',$owner,'users_id','username',$option,'class="form-control chosen" id="owner_id" required');
 				?>							
 			</div>
 			<div class="col-md-6">

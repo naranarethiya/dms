@@ -88,11 +88,25 @@
 									</tr>
 								</thead>
 								<tbody>
+									<?php foreach ($folder as $folders) { ?>
+									<tr>
+										<td class="small-col"><input type="checkbox" class="selectAll"/></td>
+                                        <td class="subject">
+                                        	<?php echo "<img src='".base_url().ICON_PATH.'folder.png'."'/>"; ?>
+											&nbsp;&nbsp;
+											<a href="<?php echo base_url().'file_manager/index/'.$folders['folder_id']; ?>"><?php echo $folders['folder_name']; ?></a>
+										</td>
+										<td class="small-col"></td>
+										<td class="small-col"></td>
+                                        <td class="name"><?php echo dateformat($folders['created_at']);?></td>
+										<td>&nbsp;&nbsp;</td>
+									</tr>
+									<?php } ?>									
 									<?php foreach ($files as $file) { ?>
 									<tr>
 										<td class="small-col"><input type="checkbox" class="selectAll"/></td>
                                         <td class="subject">
-                                        	<?php echo "<img src='".base_url()."public/img/jpg.jpg'/>"; ?>
+                                        	<?php echo "<img src='".getMimeIcon($file['file_name'])."'/>"; ?>
 											&nbsp;&nbsp;
 											<a href="#"><?php echo $file['file_name']; ?></a>&nbsp;&nbsp;
 											<small class="label label-danger"><?php echo $file['keywords']; ?></small>

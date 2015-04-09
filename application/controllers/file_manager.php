@@ -32,7 +32,7 @@ class file_manager extends CI_Controller {
 			}
 			$data['extfolder']['subfolder']=$new_arr;
 		}
-		//dsm($data); die;
+		//dsm($data['extfolder']); die;
 		$data['contant']=$this->load->view('view_data',$data,true);		
 		$this->load->view('master',$data);		
 	}
