@@ -3646,13 +3646,13 @@ li input[type="checkbox"]:checked + ol > li:last-child { margin: 0 0 0.063em; /*
 }
 
 .btn-breadcrumb .btn {
-  padding:6px 12px 6px 24px;
+  padding:6px 6px 6px 13px;
 }
 .btn-breadcrumb .btn:first-child {
   padding:6px 6px 6px 10px;
 }
 .btn-breadcrumb .btn:last-child {
-  padding:6px 18px 6px 24px;
+  padding:6px 6px 6px 13px;
 }
 
 /** Default button **/
@@ -3704,7 +3704,7 @@ li input[type="checkbox"]:checked + ol > li:last-child { margin: 0 0 0.063em; /*
 
 /* === For desktops ================================== */
 @media (min-width: 992px) {
-    .btn-breadcrumb > *:nth-last-child(-n+6) {
+    .btn-breadcrumb > *:nth-last-child(-n+3) {
         display:block;
     } 
     .btn-breadcrumb > * div {

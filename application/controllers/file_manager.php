@@ -12,6 +12,9 @@ class file_manager extends CI_Controller {
 		$data['pageTitle']="FileManager";
 		$data['title']="FileManager";
 		$this->load->model('dms_model');
+		if(!$folder_id) {
+			$folder_id=$this->session->userdata('home_folder');
+		}
 		if($folder_id!='') {
 			$user=$this->session->all_userdata('users_id');
 			$folder=$this->dms_model->get_folders('',array('folder_id'=>$folder_id));
@@ -44,7 +47,8 @@ class file_manager extends CI_Controller {
 			$data['parent_folder_id']=$this->session->userdata('home_folder');
 		}
 		/* (Owner) User details */
-		$data['owner']=$this->user_model->get_users(array('parent_user'=>$this->session->userdata('parent_user')));
+		$data['owner']=$this->user_model->get_users(array('parent_user'=>$this->session->userdata('users_id')));
+		$data['owner'][]=$this->session->all_userdata();
 		$this->load->view('folder_addform',$data);
 	}
 
@@ -56,7 +60,8 @@ class file_manager extends CI_Controller {
 		$this->load->library('form_validation');
 		$this->form_validation->set_error_delimiters('<div class="error">', '</div>');
 		$this->form_validation->set_rules('owner_id', 'Owner', 'required');
-		$this->form_validation->set_rules('folder_name', 'Folder Name', 'required|min_length[1]|max_length[100]|regex_match[/^[a-zA-Z0-9_ ]+$/]');
+		$this->form_validation->set_rules('folder_name', 'Folder Name', 'required|min_length[1]|max_length[100]');
+
 
 		if ($this->form_validation->run() == FALSE) {
 			set_message(validation_errors());
@@ -67,7 +72,8 @@ class file_manager extends CI_Controller {
 
 		$parent_folder_id = $this->input->post('parent_folder_id');		
 		$owner_id = $this->input->post('owner_id');		
-		$folder_name = $this->input->post('folder_name');		
+		$folder_name = $this->input->post('folder_name');
+		$folder_name=preg_replace('\\/?%*:|\"<>','-',$folder_name);
 		$description = $this->input->post('description');
 
 		/* Parent folder details */
@@ -129,7 +135,7 @@ class file_manager extends CI_Controller {
 		$this->load->library('form_validation');
 		$this->form_validation->set_error_delimiters('<div class="error">', '</div>');
 		$this->form_validation->set_rules('owner_id', 'Owner', 'required');
-		$this->form_validation->set_rules('file_title', 'File Title', 'required|min_length[1]|max_length[100]|regex_match[/^[a-zA-Z0-9_ ]+$/]');
+		$this->form_validation->set_rules('file_title', 'File Title', 'required|min_length[1]|max_length[100]');
 
 		if ($this->form_validation->run() == FALSE) {
 			set_message(validation_errors());
@@ -171,6 +177,8 @@ class file_manager extends CI_Controller {
 				if($ext_file=="png" || $ext_file=="jpg" || $ext_file=="jpeg" || $ext_file=="gif" || $ext_file=="doc"|| $ext_file=="docx"|| $ext_file=="ppt"|| $ext_file=="pptx"|| $ext_file=="xls"|| $ext_file=="xlsx" || $ext_file=="pdf" || $ext_file=="txt") {
 
 					$file_name=$file['name'];
+					/* replace special characters */
+					$file_name=preg_replace('\\/?%*:|\"<>','-',$file_name);
 					$file_size=$_FILES['file']['size'];
 					$folder=DOCUMENT_ROOT.$parent_folder[0]['real_path'];
 					$upload=$folder.$file_name;
