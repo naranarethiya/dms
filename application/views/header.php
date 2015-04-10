@@ -22,11 +22,6 @@
                         <li class="treeview"><a href="<?php echo base_url().'user'; ?>"><span>User</span></a></li>
                         <li class="treeview"></li>
                     </ul>                                            
-                </li> 
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <?php echo ucfirst($this->session->userdata('role')); ?>
-                    </a>
                 </li>
                 <li class="dropdown user user-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">

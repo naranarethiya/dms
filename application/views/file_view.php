@@ -57,44 +57,8 @@
 					</div><!-- /.col (LEFT) -->
 					<div class="col-md-9 col-sm-8">
 						<div class="row pad">
-							<div class="col-sm-6">
-								<label style="margin-right: 10px;">
-									<input type="checkbox" id="checkall"/>
-								</label>
-								<!-- Action button -->
-								<div class="btn-group">
-									<button type="button" class="btn btn-default btn-sm btn-flat dropdown-toggle" data-toggle="dropdown">
-										Action <span class="caret"></span>
-									</button>
-									<ul class="dropdown-menu" role="menu">
-										<li><a href="#">Copy</a></li>
-										<li><a href="#">Move</a></li>
-										<li><a href="#">Download</a></li>
-										<li><a href="#">Delete</a></li>
-										<li><a href="#">Permission</a></li>
-										<li><a href="#">Mark Favourite</a></li>
-										<li><a href="#">Clear Favourite</a></li>
-									</ul>
-								</div>							
-								<!-- Action button -->
-								<input type="hidden" id="parent_folder_id" value="<?php if(isset($folder_id)) { echo $folder_id; } else { echo $this->session->userdata('home_folder'); }?>"/>
-								<a href="#" onclick="create_folder()" class="btn btn-sm btn-primary"><i class="fa fa-folder"></i><span>&nbsp;&nbsp;New Folder</span></a>
-								<a href="#" onclick="create_file()" class="btn btn-primary btn-sm"><i class="fa fa-file"></i><span>&nbsp;&nbsp;New File</span></a>	
-							</div>
-							<div class="col-sm-6 search-form">
-								<form action="#" class="text-right">
-									<div class="input-group">
-										<input type="text" class="form-control input-sm" placeholder="Search">
-										<div class="input-group-btn">
-											<button type="submit" name="q" class="btn btn-sm btn-primary"><i class="fa fa-search"></i></button>
-										</div>
-									</div>
-								</form>
-							</div>
-						</div><!-- /.row -->
-						<div class="row pad">
 							<a href="#" class="fa fa-fw fa-refresh" onclick="window.location.reload( true );" data-toggle="tooltip" data-placement="top" title="Refresh"></a>
-							<a href="<?php echo base_url()."file_manager/index/".$up_folder;?>" class="fa fa-fw fa-arrow-up" data-toggle="tooltip" data-placement="top" title="Up-Level"></a>
+							<a href="<?php echo base_url()."file_manager/index/".$file['parent_folder_id'];?>" class="fa fa-fw fa-arrow-up" data-toggle="tooltip" data-placement="top" title="Up-Level"></a>
 							<a href="#" class="fa fa-fw fa-arrow-left" onclick="window.history.back();" data-toggle="tooltip" data-placement="top" title="Back"></a>
 						</div>	
 						<div class="well">
@@ -117,17 +81,15 @@
 										<td><?php echo $file['description'];?></td>
 										<td valign="top">
 											<a href="<?php echo base_url().'file_manager/download_file/'.$file['document_id'].'/'.$file['file_version'];?>"><i class="fa fa-fw fa-download"></i>Download</a><br/>
-											<!--<i class="fa fa-fw fa-external-link"></i>View Online<br/>
-											<i class="fa fa-fw fa-external-link"></i>Copy<br/>
-											<i class="fa fa-fw fa-external-link"></i>Move<br/>
-											<i class="fa fa-fw fa-external-link"></i>Delete<br/>
-											if($file['favorite_id']=='') {
-												<i class="fa fa-fw fa-external-link"></i>Mark Favorite<br/>
+											<a href="#"><i class="fa fa-fw fa-copy"></i> Copy</a><br/>
+											<a href="#"><i class="fa fa-fw fa-cut "></i> Move</a><br/>
+											<a href="#"><i class="fa fa-fw fa-trash-o"></i> Delete</a><br/>
+											<?php if($file['favorite_users']!='') {
+												echo'<a href="#"><i class="fa fa-fw fa-star-o"></i> Clear Favorite</a><br/>';
 											}
 											else {
-												<i class="fa fa-fw fa-external-link"></i>Clear Favorite<br/>
-											}
-											-->
+												echo '<a href="#"><i class="fa fa-fw fa-star"></i> Mark Favorite</a> <br/>';
+											} ?>
 										</td>
 									</tr>
 									<?php foreach ($file['child'] as $child) { ?>

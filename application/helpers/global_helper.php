@@ -1,4 +1,5 @@
 <?php
+ $CI =& get_instance();
 
 function generateOTP() {
 	$password=random_string("numeric",4);

@@ -265,11 +265,8 @@ class file_manager extends CI_Controller {
 			'dms_document_files.file_version'=>$version
 		);
 		$download_file=$this->dms_model->get_document($filter);
-		print_last_query();
-		dsm($download_file);
 		$download_file=$download_file[$document_id];
-		echo $url='application/'.$download_file['real_path'].$download_file['file_name']; 
-		$data=file_get_contents($url);
+		$url='application/'.$download_file['real_path'].$download_file['file_name'];
 		_push_file($url,$download_file['file_name']);	
 	}
 }

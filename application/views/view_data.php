@@ -51,7 +51,6 @@
 									<ul class="dropdown-menu" role="menu">
 										<li><a href="#">Copy</a></li>
 										<li><a href="#">Move</a></li>
-										<li><a href="#">Download</a></li>
 										<li><a href="#">Delete</a></li>
 										<li><a href="#">Permission</a></li>
 										<li><a href="#">Mark Favourite</a></li>
@@ -60,8 +59,11 @@
 								</div>							
 								<!-- Action button -->
 								<input type="hidden" id="parent_folder_id" value="<?php if(isset($folder_id)) { echo $folder_id; } else { echo $this->session->userdata('home_folder'); }?>"/>
-								<a href="#" onclick="create_folder()" class="btn btn-sm btn-primary"><i class="fa fa-folder"></i><span>&nbsp;&nbsp;New Folder</span></a>
-								<a href="#" onclick="create_file()" class="btn btn-primary btn-sm"><i class="fa fa-file"></i><span>&nbsp;&nbsp;New File</span></a>	
+							<a href="#" style="margin-left:20px" class="fa fa-fw fa-refresh" onclick="window.location.reload( true );" data-toggle="tooltip" data-placement="top" title="Refresh"></a>
+							<a href="<?php echo base_url()."file_manager/index/".$up_folder;?>" class="fa fa-fw fa-arrow-up" data-toggle="tooltip" data-placement="top" title="Up-Level"></a>
+							<a href="#" class="fa fa-fw fa-arrow-left" onclick="window.history.back();" data-toggle="tooltip" data-placement="top" title="Back"></a>
+							<a href="#" onclick="create_folder()" class="fa fa-fw fa-folder" data-toggle="tooltip" data-placement="top" title="Create Folder"></a>
+							<a href="#" onclick="create_file()" class="fa fa-fw fa-file" data-toggle="tooltip" data-placement="top" title="Create File"></a>
 							</div>
 							<div class="col-sm-6 search-form">
 								<form action="#" class="text-right">
@@ -74,11 +76,6 @@
 								</form>
 							</div>
 						</div><!-- /.row -->
-						<div class="row pad">
-							<a href="#" class="fa fa-fw fa-refresh" onclick="window.location.reload( true );" data-toggle="tooltip" data-placement="top" title="Refresh"></a>
-							<a href="<?php echo base_url()."file_manager/index/".$up_folder;?>" class="fa fa-fw fa-arrow-up" data-toggle="tooltip" data-placement="top" title="Up-Level"></a>
-							<a href="#" class="fa fa-fw fa-arrow-left" onclick="window.history.back();" data-toggle="tooltip" data-placement="top" title="Back"></a>
-						</div>	
 						<div class="table-responsive">
 							<table class='table table-mailbox'>
 								<thead>
@@ -86,8 +83,7 @@
 										<th>#</th>
 										<th>Name</th> 
 										<th>Type</th> 
-										<th>Size</th> 
-										<th>Date</th> 
+										<th>Size</th>
 										<th>Action</th>
 									</tr>
 								</thead>
@@ -100,29 +96,42 @@
 											&nbsp;&nbsp;
 											<a href="<?php echo base_url().'file_manager/index/'.$folders['folder_id']; ?>">
 												<?php echo $folders['folder_name']; ?>
-											</a>
+											</a><br/>
+											<span>created at : <b><?php echo dateformat($folders['created_at']);?></b></span>
 										</td>
 										<td class="small-col"></td>
 										<td class="small-col"></td>
-                                        <td class="name"><?php echo dateformat($folders['created_at']);?></td>
-										<td>&nbsp;&nbsp;</td>
+										<td>
+											<a href="#"><i class="fa fa-fw fa-edit" data-toggle="tooltip" data-placement="top" title="Edit"></i></a>
+											<a href="#"><i class="fa fa-fw fa-trash-o" data-toggle="tooltip" data-placement="top" title="Delete"></i></a>
+										</td>
 									</tr>
 									<?php } ?>									
-									<?php foreach ($files as $file) { ?>
+									<?php 
+										foreach ($files as $file) { 
+											if($file['file_name']=='') {
+												continue;
+											}
+										?>
 									<tr>
 										<td class="small-col"><input type="checkbox" class="selectAll"/></td>
                                         <td class="subject">
                                         	<?php echo "<img src='".getMimeIcon($file['file_name'])."'/>"; ?>
 											&nbsp;&nbsp;
 											<a href="<?php echo base_url().'file_manager/file_view/'.$file['document_id']; ?>"><?php echo $file['file_name']; ?></a>&nbsp;&nbsp;
+											<?php if($file['favorite_users']!='') {
+												echo '<i class="fa fa-star"></i>&nbsp;';
+											}  ?>
 											<small class="label label-danger"><?php echo $file['keywords']; ?></small>
+											<br/>
+											<span>created at : <b><?php echo dateformat($folders['created_at']);?></b></span>
 										</td>
 										<td class="small-col"><?php echo $file['file_extension'];?></td>
-										<td class="small-col"><?php echo $file['file_size'];?></td>
-                                        <td class="name"><?php echo dateformat($file['created_at']);?></td>
+										<td class="small-col"><?php echo formatted_size($file['file_size']);?></td>
 										<td>
-											<i class="fa fa-fw fa-download"></i>&nbsp;&nbsp;
-											<i class="fa fa-fw fa-edit"></i>
+											<a href="<?php echo base_url()."file_manager/download_file/".$file['document_id'].""; ?>"><i class="fa fa-fw fa-download"></i></a>
+											<a href="#"><i class="fa fa-fw fa-edit" data-toggle="tooltip" data-placement="top" title="Edit"></i></a>
+											<a href="#"><i class="fa fa-fw fa-trash-o" data-toggle="tooltip" data-placement="top" title="Delete"></i></a>
 										</td>
 									</tr>
 									<?php } ?>
@@ -138,6 +147,7 @@
 <!-- File folder view END -->
 
 <script type="text/javascript">
+var folder_details=<?php echo json_encode($folder_info); ?>;
 $(document).ready(function(){
 	$('#checkall').click(function(){
 		$('.selectAll').each(function(event) {
