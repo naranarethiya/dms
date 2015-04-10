@@ -5,9 +5,6 @@
 	else {
 		$up_folder="1";
 	}
-	if(isset($file)) {
-		$file=$file[0];
-	}
 ?>
 <!-- File folder view BEGIN -->
 <div class="mailbox row">
@@ -17,9 +14,10 @@
 				<div class="row">
 					<div class="col-md-3 col-sm-4">
 						 <div class="box-header">
-						 	<h5>
-								Document Information
-							</h5>
+							<?php
+							//dsm($folder_info);die;
+								echo create_breadcrumbs($file['real_path'],$file['id_path']);
+							?>
 						</div>
 						<div>
 							<ul class="nav nav-pills nav-stacked">
@@ -30,7 +28,7 @@
 									<tbody>
 										<tr>
 											<td>ID:</td>
-											<td><?php echo $file['document_file_id'];?></td>
+											<td><?php echo $file['document_id'];?></td>
 										</tr>
 										<tr>
 											<td>Owner:</td>
@@ -112,17 +110,52 @@
 										<td><?php echo "<img src='".getMimeIcon($file['file_name'])."' width='50' height='50'/>"; ?></td>
 										<td>
 											<?php echo $file['file_name'];?><br/>
-											<?php echo 'Version:'.$file['file_version'];?><br/>
-											<?php echo $file['file_size'].'KB';?><br/>
-											<?php echo 'Uploaded by'.$file['first_name'].' '.$file['last_name'];?><br/>
-											<?php echo dateformat($file['created_at']);?>
+											<?php echo 'Version: '.$file['file_version'];?><br/>
+											<?php echo 'Size: '.$file['file_size'].'KB';?><br/>
+											<?php echo 'Uploaded by: '.$file['first_name'].' '.$file['last_name'];?><br/>
 										</td>
 										<td><?php echo $file['description'];?></td>
-										<td>
-											<i class="fa fa-fw fa-download"></i>Download<br/>
-											<i class="fa fa-fw fa-external-link"></i>View Online
+										<td valign="top">
+											<a href="<?php echo base_url().'file_manager/download_file/'.$file['document_id'].'/'.$file['file_version'];?>"><i class="fa fa-fw fa-download"></i>Download</a><br/>
+											<!--<i class="fa fa-fw fa-external-link"></i>View Online<br/>
+											<i class="fa fa-fw fa-external-link"></i>Copy<br/>
+											<i class="fa fa-fw fa-external-link"></i>Move<br/>
+											<i class="fa fa-fw fa-external-link"></i>Delete<br/>
+											if($file['favorite_id']=='') {
+												<i class="fa fa-fw fa-external-link"></i>Mark Favorite<br/>
+											}
+											else {
+												<i class="fa fa-fw fa-external-link"></i>Clear Favorite<br/>
+											}
+											-->
 										</td>
-									</tr>																																							
+									</tr>
+									<?php foreach ($file['child'] as $child) { ?>
+										<tr>
+											<td><?php echo "<img src='".getMimeIcon($child['file_name'])."' width='50' height='50'/>"; ?></td>
+											<td>
+												<?php echo $child['file_name'];?><br/>
+												<?php echo 'Version: '.$child['file_version'];?><br/>
+												<?php echo 'Size: '.$child['file_size'].'KB';?><br/>
+												<?php echo 'Uploaded by: '.$child['first_name'].' '.$child['last_name'];?><br/>
+											</td>
+											<td><?php echo $child['description'];?></td>
+											<td valign="top">
+												<a href="<?php echo base_url().'file_manager/download_file/'.$child['document_file_id'].'/'.$child['file_version'];?>"><i class="fa fa-fw fa-download"></i>Download</a><br/>
+												<!--<i class="fa fa-fw fa-external-link"></i>View Online<br/>
+												<i class="fa fa-fw fa-external-link"></i>Copy<br/>
+												<i class="fa fa-fw fa-external-link"></i>Move<br/>
+												<i class="fa fa-fw fa-external-link"></i>Delete<br/>
+												if($file['favorite_id']=='') {
+													<i class="fa fa-fw fa-external-link"></i>Mark Favorite<br/>
+												}
+												else {
+													<i class="fa fa-fw fa-external-link"></i>Clear Favorite<br/>
+												}
+												-->
+											</td>
+										</tr>										
+									<?php } ?>																																							
 								</tbody>
 							</table>						
 						</div><!-- /.table-responsive -->

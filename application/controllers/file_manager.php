@@ -18,12 +18,14 @@ class file_manager extends CI_Controller {
 		if($folder_id!='') {
 			$user=$this->session->all_userdata('users_id');
 			$folder=$this->dms_model->get_folders('',array('folder_id'=>$folder_id));
-			
+			if(count($folder) > 0) {
+				$folder=$folder[0];
+			}
 			$access=$this->dms_model->get_access_mode($folder,$user,true);
 			if($access>='1') {
 				$data['extfolder']=$this->dms_model->listout_folder($folder_id);
 				$data['folder_id']=$folder_id;
-				$data['folder_info']=$folder[0];
+				$data['folder_info']=$folder;
 			}
 			else {
 				set_message('Access deined'.$folder_id);
@@ -182,23 +184,25 @@ class file_manager extends CI_Controller {
 					$replace_chrs=array('/','\\','?','%','*',':','|','"',"'",'<','>');
 					$file_name=str_replace($replace_chrs,"-",$file_name);
 					$file_size=$_FILES['file']['size'];
-					$folder=DOCUMENT_ROOT.$parent_folder[0]['real_path'];
-					$upload=$folder.$file_name;
-					$storepath=$folder.$file_name;
-					$idpath=$parent_folder[0]['id_path'];
+					$folder=ROOT_FOLDER.$parent_folder[0]['real_path'];
+					$upload=DOCUMENT_ROOT.$parent_folder[0]['real_path'].$file_name;
+					$storepath=$folder;
+					$idpath=ROOT_FOLDER_ID.$parent_folder[0]['id_path'];
 					move_uploaded_file($file['tmp_name'],$upload);	
 					$documentfile_data=array(
 						'document_id'=>$document_id,
 						'file_name'=>$file_name,
-						'file_path'=>$storepath,
-						'file_path_id'=>$idpath,
+						'real_path'=>$storepath,
+						'id_path'=>$idpath,
 						'file_size'=>$file_size,
 						'file_mimetype'=>$ext_file,
 						'file_extension'=>$ext_file,
+						'file_version'=>'1',
 						'user_id'=>$this->session->userdata('users_id'),
 						'file_comment'=>$description,
 						'created_at'=>date('Y-m-d H:i:s')
-					);	
+					);
+					//dsm($documentfile_data); die;	
 					$res1=$this->dms_model->add_documentfile_data($documentfile_data);
 				}
 				else {
@@ -238,12 +242,34 @@ class file_manager extends CI_Controller {
 		echo $li;
 	}
 
-	function file_view($file_id=false) {
+	function file_view($file_id) {
 		$data['pageTitle']="File View";
 		$data['title']="File View";
 		$this->load->model('dms_model');
 		$data['file']=$this->dms_model->get_document(array('dms_documents.document_id'=>$file_id));
+		
+		if(!isset($data['file'][$file_id])) {
+			show_404();
+		}
+		$data['file']=$data['file'][$file_id];
+		//dsm($data['file']); die;
 		$data['contant']=$this->load->view('file_view',$data,true);		
 		$this->load->view('master',$data);			
+	}
+
+	function download_file($document_id,$version=1) {
+		$this->load->model('dms_model');
+		$this->load->helper('download');
+		$filter=array(
+			'dms_documents.document_id'=>$document_id, 
+			'dms_document_files.file_version'=>$version
+		);
+		$download_file=$this->dms_model->get_document($filter);
+		print_last_query();
+		dsm($download_file);
+		$download_file=$download_file[$document_id];
+		echo $url='application/'.$download_file['real_path'].$download_file['file_name']; 
+		$data=file_get_contents($url);
+		_push_file($url,$download_file['file_name']);	
 	}
 }

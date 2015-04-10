@@ -161,14 +161,18 @@ class dms_model extends CI_Model {
 		if($filter!='') {
 			apply_filter($filter);
 		}
-		$this->db->select('dms_documents.*,dms_document_files.*,dms_users.first_name,dms_users.last_name');
+		$this->db->select('dms_documents.*,dms_document_files.*,dms_users.first_name,dms_users.last_name,dsm_favorite_document.document_id as favorite_id');
 		$this->db->join("dms_document_files","dms_documents.document_id=dms_document_files.document_id");
+		$this->db->join("dsm_favorite_document","dsm_favorite_document.document_id=dms_documents.document_id",'left');
 		$this->db->join("dms_users","dms_documents.owner_id=dms_users.users_id");
-		return $this->db->get('dms_documents')->result_array();	
+		$res=$this->db->get('dms_documents')->result_array();
+		$result=parent_child_array($res,'document_id');
+		return $result;		
 	}
 	
 	/* return maximum access rights of user of file */
 	function get_access_mode($resource,$user,$is_folder=false) {
+		//dsm($resource);
 		$this->load->model('user_model');
 		/* Administrators have unrestricted access */
 		if($user['role']=='admin') {
@@ -177,6 +181,8 @@ class dms_model extends CI_Model {
 
 		/* if accessing inside home folder or not */
 		$home_folder=$user['home_folder'];
+		//echo '/'.$resource['id_path'].'<br/>';
+		//echo '/'.$home_folder.'/';
 		if(strpos('/'.$resource['id_path'],'/'.$home_folder.'/')===false) {
 			return false;
 		}
