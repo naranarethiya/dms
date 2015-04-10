@@ -73,7 +73,8 @@ class file_manager extends CI_Controller {
 		$parent_folder_id = $this->input->post('parent_folder_id');		
 		$owner_id = $this->input->post('owner_id');		
 		$folder_name = $this->input->post('folder_name');
-		$folder_name=preg_replace('\\/?%*:|\"<>','-',$folder_name);
+		$replace_chrs=array('/','\\','?','%','*',':','|','"',"'",'<','>');
+		$folder_name=str_replace($replace_chrs,"-",$folder_name);
 		$description = $this->input->post('description');
 
 		/* Parent folder details */
@@ -178,7 +179,8 @@ class file_manager extends CI_Controller {
 
 					$file_name=$file['name'];
 					/* replace special characters */
-					$file_name=preg_replace('\\/?%*:|\"<>','-',$file_name);
+					$replace_chrs=array('/','\\','?','%','*',':','|','"',"'",'<','>');
+					$file_name=str_replace($replace_chrs,"-",$file_name);
 					$file_size=$_FILES['file']['size'];
 					$folder=DOCUMENT_ROOT.$parent_folder[0]['real_path'];
 					$upload=$folder.$file_name;

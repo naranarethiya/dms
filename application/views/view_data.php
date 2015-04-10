@@ -14,17 +14,18 @@
 		<div class="box box-solid">
 			<div class="box-body">
 				<div class="row">
-					<div class="col-md-3 col-sm-4">
+					<div class="col-md-3 col-sm-3">
 						 <div class="box-header">
 								<?php
 								//dsm($folder_info);die;
 									echo create_breadcrumbs($folder_info['real_path'],$folder_info['id_path']);
 								?>
 						</div>
-						<div>
+
 						<ul class="nav nav-pills nav-stacked">
 							<li class="header"></li>
 						</ul>
+						<div style="background-color: #F9F9F9;padding: 10px;">
 							<ol class="tree">
 								<?php foreach ($folder as $row) { ?>
 									<li>
@@ -36,7 +37,7 @@
 							</ol>						
 						</div>
 					</div><!-- /.col (LEFT) -->
-					<div class="col-md-9 col-sm-8">
+					<div class="col-md-9 col-sm-9">
 						<div class="row pad">
 							<div class="col-sm-6">
 								<label style="margin-right: 10px;">
