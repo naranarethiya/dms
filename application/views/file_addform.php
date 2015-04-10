@@ -33,12 +33,16 @@
 			</div>			
 			<div class="col-md-6">
 				<label>Keyword</label>
-	 			<?php 
-					echo generate_combobox('keywords',$keyword,'keyword','keyword','','class="form-control chosen" id="keywords"');
-				?>							
+				<input type="text" class="form-control autocomplete" name="keywords" placeholder="Choose Keyword" />						
 			</div>
 		</div>
 		<div class="col-md-12">
+			<div class="col-md-6">
+				<label>Category</label>
+	 			<?php 
+					echo generate_combobox('category_id[]',$category,'category_id','category_title','','class="form-control chosen" multiple');
+				?>							
+			</div>			
 			<div class="col-md-6">
 				<label>Description</label>
 				<textarea class="form-control" id="description" name="description" placeholder="Description"></textarea> 
@@ -52,7 +56,14 @@
 			</div>		
 		</div>
 	</form>	
-</div>	
+</div>
+<link rel="stylesheet" type="text/css" href="<?php echo base_url()."public/js/jquery-ui/jquery-ui.min.css"; ?>">
+<script type="text/javascript" src="<?php echo base_url()."public/js/jquery-ui/jquery-ui.min.js"; ?>"></script>
+<style type="text/css">
+	ul.ui-autocomplete {
+	    z-index: 5000;
+	}
+</style>	
 <script type="text/javascript">
 	$('.chosen').chosen();
 	$(document).ready(function(){
@@ -61,4 +72,53 @@
 			$('#file').after("<br/><input name='file[]' class='form-control' type='file' />");
 		});
 	});	
+
+/* Start keyword autocomplete */
+$(function() {
+    function split(val) {
+      return val.split( /,\s*/ );
+    }
+    function extractLast(term) {
+      return split( term ).pop();
+    }
+ 	var source=base_url+"file_manager/get_keyword";
+    $("input[name='keywords']")
+    // don't navigate away from the field on tab when selecting an item
+      .bind("keydown", function(event) {
+        if (event.keyCode === $.ui.keyCode.TAB &&
+            $(this).autocomplete( "instance" ).menu.active) {
+          event.preventDefault();
+        }
+      })
+    .autocomplete({
+    source: function( request, response ) {
+			$.getJSON( source, {
+				term: extractLast( request.term )
+			}, response );
+		},
+	search: function() {
+          // custom minLength
+          var term = extractLast( this.value );
+          if ( term.length < 1 ) {
+            return false;
+          }
+        },
+    focus: function() {
+          // prevent value inserted on focus
+          return false;
+    	},
+    select: function(event, ui) {
+		var terms = split( this.value );
+		// remove the current input
+		terms.pop();
+		// add the selected item
+		terms.push( ui.item.value );
+		// add placeholder to get the comma-and-space at the end
+		terms.push("");
+		this.value = terms.join( "," );
+		return false;
+		}
+	});      
+});
+/* End keyword autocomplete */	
 </script>

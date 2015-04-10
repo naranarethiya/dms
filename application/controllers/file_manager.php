@@ -126,13 +126,14 @@ class file_manager extends CI_Controller {
 		/* (Owner) User details */
 		$data['owner']=$this->user_model->get_users(array('parent_user'=>$this->session->userdata('parent_user')));
 		/* Keyword details*/
-		$data['keyword']=$this->dms_model->get_user_keyword(array('user_id'=>$this->session->userdata('users_id')));
+		$data['keyword']=$this->dms_model->get_keyword();
+		/* category details*/
+		$data['category']=$this->dms_model->get_category(array('user_id'=>$this->session->userdata('users_id')));
 		$this->load->view('file_addform',$data);
 	}
 
 	function save_file() {
 		//dsm($this->input->post()); die;
-
 		$this->load->model('dms_model');
 		$this->load->model('user_model');
 		$this->load->library('form_validation');
@@ -151,8 +152,9 @@ class file_manager extends CI_Controller {
 		$owner_id = $this->input->post('owner_id');		
 		$file_title = $this->input->post('file_title');		
 		$description = $this->input->post('description');
-		$keywords = $this->input->post('keywords');
-
+		$keywords = rtrim($this->input->post('keywords'),',');
+		$category_id = $this->input->post('category_id');
+		
 		/* Parent folder details */
 		$filter['WHERE']=array('folder_id'=>$parent_folder_id);
 		$parent_folder=$this->dms_model->get_folders('',$filter);
@@ -170,6 +172,7 @@ class file_manager extends CI_Controller {
 			'created_by'=>$this->session->userdata('users_id'),
 			'created_at'=>date('Y-m-d H:i:s')
 		);
+
 		$res=$this->dms_model->add_document_data($document_data);
 		$document_id=$this->db->insert_id();
 		if($res){
@@ -211,6 +214,15 @@ class file_manager extends CI_Controller {
 				}				
 			}
 			if($res1){
+				if(!empty($category_id) && $category_id[0]!='') {
+					foreach ($category_id as $key => $value) {
+						$category_data=array(
+							'document_id'=>$document_id,
+							'category_id'=>$value,
+						);
+						$res1=$this->dms_model->add_document_category($category_data);
+					}
+				}
 				set_message('files uploaded successfully','success');
 				redirect_back();
 			}
@@ -272,4 +284,159 @@ class file_manager extends CI_Controller {
 		$data=file_get_contents($url);
 		_push_file($url,$download_file['file_name']);	
 	}
+
+	function add_keyword($keyword_id=false) {
+		$data['pageTitle']="Keyword Details";
+		$data['title']="Keyword Details";
+		$this->load->model('dms_model');
+		$filter=array();
+		if($keyword_id!='') {
+			$filter=array(
+				'dsm_keywords.keyword_id'=>$keyword_id
+			);			
+			$data['edit_keyword']=$this->dms_model->get_keyword($filter);
+		}
+
+		$data['keyword']=$this->dms_model->get_keyword();
+		$data['contant']=$this->load->view('keyword_addform',$data,true);
+		$this->load->view('master',$data);				
+	}
+
+	function save_keyword() {
+		$keyword_id=$this->input->post('keyword_id');
+		$this->load->model('dms_model');
+		$this->load->library('form_validation');
+		$this->form_validation->set_error_delimiters('<div class="error">', '</div>');
+		$this->form_validation->set_rules('keyword', 'Keyword', 'required|min_length[1]|max_length[100]');
+		if ($this->form_validation->run() == FALSE) {
+			set_message(validation_errors());
+			redirect_back();		
+			return 0;
+			die;
+		}
+		$keyword=strtoupper($this->input->post('keyword'));
+		$keyword_data = array(
+			'keyword' => $keyword,
+			'user_id' => $this->session->userdata('users_id'),
+		);
+		if($keyword_id) {
+			$res=$this->dms_model->update_keyword($keyword_data,$keyword_id);
+			if($res){
+				set_message('Keyword eidtted.','success');
+				redirect(base_url().'file_manager/add_keyword');
+			}	
+			else {
+				set_message('something went wrong'.$this->db->_error_message);
+				redirect_back();				
+			}
+		}	
+		else {
+			$keyword_data['created_at']=date('Y-m-d H:i:s');
+			$res=$this->dms_model->add_keyword($keyword_data);
+			if($res){
+				set_message('New keyword added.','success');
+				redirect_back();
+			}	
+			else {
+				set_message('something went wrong'.$this->db->_error_message);
+				redirect_back();				
+			}		
+		}	
+	}
+
+	function del_keyword() {
+		$this->load->model('dms_model');
+		$del_id=$this->input->post('id');
+		$delquery = $this->dms_model->delete_keyword($del_id);
+		if($delquery) {
+			$return=array("status"=>'1',"message"=>"Keyword deleted successfully");
+		}
+		else {
+			$return=array("status"=>'0',"message"=>"Something went wrong!!");
+		}
+		echo json_encode($return);		
+	}	
+
+	function add_category($category_id=false) {
+		$data['pageTitle']="File Category Details";
+		$data['title']="File Category Details";
+		$this->load->model('dms_model');
+		if($category_id!='') {
+			$data['edit_category']=$this->dms_model->get_category(array('dsm_category.category_id'=>$category_id));
+		}
+		$data['category']=$this->dms_model->get_category();
+		$data['contant']=$this->load->view('category_addform',$data,true);
+		$this->load->view('master',$data);				
+	}
+
+	function save_category() {
+		$category_id=$this->input->post('category_id');
+		$this->load->model('dms_model');
+		$this->load->library('form_validation');
+		$this->form_validation->set_error_delimiters('<div class="error">', '</div>');
+		$this->form_validation->set_rules('category_title', 'Category Title', 'required|min_length[1]|max_length[100]');
+		if ($this->form_validation->run() == FALSE) {
+			set_message(validation_errors());
+			redirect_back();		
+			return 0;
+			die;
+		}
+		$category_title=strtoupper($this->input->post('category_title'));
+		$note=$this->input->post('note');
+		$category_data = array(
+			'category_title' => $category_title,
+			'note' => $note,
+			'user_id' => $this->session->userdata('users_id'),
+		);
+		if($category_id) {
+			$res=$this->dms_model->update_category($category_data,$category_id);
+			if($res){
+				set_message('Category eidtted.','success');
+				redirect(base_url().'file_manager/add_category');
+			}	
+			else {
+				set_message('something went wrong'.$this->db->_error_message);
+				redirect_back();				
+			}
+		}	
+		else {
+			$category_data['created_at']=date('Y-m-d H:i:s');
+			$res=$this->dms_model->add_category($category_data);
+			if($res){
+				set_message('New Category added.','success');
+				redirect_back();
+			}	
+			else {
+				set_message('something went wrong'.$this->db->_error_message);
+				redirect_back();				
+			}		
+		}	
+	}
+
+	function del_category() {
+		$this->load->model('dms_model');
+		$del_id=$this->input->post('id');
+		$delquery = $this->dms_model->delete_category($del_id);
+		if($delquery) {
+			$return=array("status"=>'1',"message"=>"Category deleted successfully");
+		}
+		else {
+			$return=array("status"=>'0',"message"=>"Something went wrong!!");
+		}
+		echo json_encode($return);		
+	}
+
+	function get_keyword() {
+		$this->load->model('dms_model');
+		$title=$this->input->get('term');
+		$filter['WHERE']="keyword like '%".$title."%'";		
+		$keyword=$this->dms_model->get_keyword($filter);
+		$return=array();
+		foreach($keyword as $row) {
+			$return[]=array(
+				'label'=>$row['keyword'],
+			);
+		}
+		echo json_encode($return);
+	}			
 }

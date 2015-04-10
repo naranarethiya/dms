@@ -77,15 +77,6 @@ class dms_model extends CI_Model {
 		return $valid_files;
 	}
 
-	/* get user keyword */
-	function get_user_keyword($filter=false) {
-		if($filter) {
-			apply_filter($filter);
-		}
-		$rs=$this->db->get('dsm_keywords');
-		return $rs->result_array();		
-	}
-
 	/* adding document data*/
 
 	function add_document_data($document_data) {
@@ -98,6 +89,12 @@ class dms_model extends CI_Model {
 		return $this->db->insert('dms_document_files',$documentfile_data);
 	}
 
+	/* adding documnet category */
+
+	function add_document_category($category_data) {
+		return $this->db->insert('document_category',$category_data);
+	}
+	
 	/* return home folder of user */
 	function get_home_folder($user=false) {
 		if(!$user) {
@@ -229,6 +226,54 @@ class dms_model extends CI_Model {
 		}
 		
 	}
+
+	function get_keyword($filter=false) {
+		if($filter!=''){
+			apply_filter($filter);
+		}
+		$this->db->where('dsm_keywords.user_id',$this->session->userdata('users_id'));
+		$res=$this->db->get('dsm_keywords');
+		return $res->result_array();		
+	}
+
+	function delete_keyword($del_id) {
+		$this->db->where_in('keyword_id',$del_id);
+		return $this->db->delete('dsm_keywords');		
+	}
+
+	function add_keyword($keyword_data) {
+		return $this->db->insert('dsm_keywords',$keyword_data);
+	}
+
+	function update_keyword($keyword_data,$keyword_id) {
+		$this->db->where('keyword_id',$keyword_id);
+		$this->db->where('user_id',$this->session->userdata('users_id'));
+		return $this->db->update('dsm_keywords',$keyword_data);
+	}
+
+	function get_category($filter=false) {
+		if($filter!=''){
+			apply_filter($filter);
+		}
+		$this->db->where('dsm_category.user_id',$this->session->userdata('users_id'));
+		$res=$this->db->get('dsm_category');
+		return $res->result_array();		
+	}
+
+	function delete_category($del_id) {
+		$this->db->where_in('category_id',$del_id);
+		return $this->db->delete('dsm_category');		
+	}
+
+	function add_category($category_data) {
+		return $this->db->insert('dsm_category',$category_data);
+	}
+
+	function update_category($category_data,$category_id) {
+		$this->db->where('category_id',$category_id);
+		$this->db->where('user_id',$this->session->userdata('users_id'));
+		return $this->db->update('dsm_category',$category_data);
+	}			
 
 	/* 
 		@resouce array - row of dms_folders or dms_documents table
