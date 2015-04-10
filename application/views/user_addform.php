@@ -103,11 +103,11 @@
 				<div class="col-md-6">
 					<label>Disable User</label><br/>
 	                <label class="radio-inline">
-	                    <input type="radio" name="disabled" value="1" <?php if(isset($user)) { if($user['disabled']=='1') { echo "checked"; } } else { echo "checked"; }?>>
+	                    <input type="radio" name="disabled" value="0" <?php if(isset($user)) { if($user['disabled']=='0') { echo "checked"; } } else { echo "checked"; }?>>
 	                    <b>Enable</b>
 	                </label>
 	                <label class="radio-inline">
-	                    <input type="radio" name="disabled" value="0" <?php if(isset($user)) { if($user['disabled']=='0') { echo "checked"; } }?>>
+	                    <input type="radio" name="disabled" value="1" <?php if(isset($user)) { if($user['disabled']=='1') { echo "checked"; } }?>>
 	                    <b>Disable</b>
 	                </label>	                
 				</div>	

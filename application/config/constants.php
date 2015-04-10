@@ -54,6 +54,8 @@ define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
  
  /* relative path of document root */
  define("DOCUMENT_ROOT",APPPATH."dms_root/");
+ define("ROOT_FOLDER","dms_root/");
+ define("ROOT_FOLDER_ID","1/");
  define("ICON_PATH","public/img/icon/");
 
  
