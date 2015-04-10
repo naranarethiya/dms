@@ -159,12 +159,16 @@ class dms_model extends CI_Model {
 		if($filter!='') {
 			apply_filter($filter);
 		}
-		$this->db->select('dms_documents.*,dms_document_files.*,dms_users.first_name,dms_users.last_name,dsm_favorite_document.user_id as favorite_users');
+		$this->db->select('dms_documents.*,dms_document_files.*,dms_users.first_name,dms_users.last_name,dsm_favorite_document.user_id as favorite_users,group_concat(dsm_category.category_title) as categories');
 		$this->db->join("dms_document_files","dms_documents.document_id=dms_document_files.document_id");
 		$this->db->join("dsm_favorite_document","dsm_favorite_document.document_id=dms_documents.document_id",'left');
 		$this->db->join("dms_users","dms_documents.owner_id=dms_users.users_id");
+		
+		$this->db->join("document_category","document_category.document_id=dms_documents.document_id",'left');
+		$this->db->join("dsm_category","dsm_category.category_id=document_category.category_id",'left');
 
 		$this->db->where("(dsm_favorite_document.user_id=".$this->session->userdata('users_id')." or dsm_favorite_document.user_id is null)");
+		$this->db->group_by('dms_documents.document_id');
 		$res=$this->db->get('dms_documents')->result_array();
 		$result=parent_child_array($res,'document_id');
 		return $result;		

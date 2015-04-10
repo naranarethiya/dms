@@ -12,6 +12,7 @@ class file_manager extends CI_Controller {
 		$data['pageTitle']="FileManager";
 		$data['title']="FileManager";
 		$this->load->model('dms_model');
+		$this->load->model('user_model');
 		if(!$folder_id) {
 			$folder_id=$this->session->userdata('home_folder');
 		}
@@ -35,8 +36,50 @@ class file_manager extends CI_Controller {
 		else {
 			$data['extfolder']=$this->dms_model->listout_folder();
 		}
+		/* (Owner) User details */
+		$data['owner']=$this->user_model->get_users(array('parent_user'=>$this->session->userdata('parent_user')));
+		/* category details*/
+		$data['category']=$this->dms_model->get_category(array('user_id'=>$this->session->userdata('users_id')));
+
 		$data['contant']=$this->load->view('view_data',$data,true);		
 		$this->load->view('master',$data);		
+	}
+
+	function search_file() {
+		//dsm($this->input->post()); die;
+		$data['pageTitle']="Search Result";
+		$data['title']="Search Result";		
+		$this->load->model('dms_model');
+		$this->load->model('user_model');		
+		$keyword=$this->input->post('keyword');
+		$category_id=$this->input->post('category_id');
+		$owner_id=$this->input->post('owner_id');
+		$from_date=$this->input->post('from_date');
+		$to_date=$this->input->post('to_date');
+		if($keyword!='') {
+			$filter['WHERE']="dms_documents.file_title like '%".$keyword."%' OR dms_document_files.file_name like '%".$keyword."%' OR dms_document_files.real_path like '%".$keyword."%' or dms_document_files.file_extension like '%".$keyword."%' or dms_document_files.file_comment like '%".$keyword."%'";
+		}
+		if($category_id!='') {
+			$filter['document_category.category_id']=$category_id;
+		}
+		if($owner_id!='') {
+			$filter['dms_documents.owner_id']=$owner_id;
+		}
+		if($from_date!='') {
+			$filter['dms_document_files.created_at >= ']=$from_date;
+		}
+		if($to_date!='') {
+			$filter['dms_document_files.created_at <= ']=$to_date;
+		}
+
+		$file=$this->dms_model->get_document($filter);
+		$data['extfolder']['files']=$file;
+		/* (Owner) User details */
+		$data['owner']=$this->user_model->get_users(array('parent_user'=>$this->session->userdata('parent_user')));
+		/* category details*/
+		$data['category']=$this->dms_model->get_category(array('user_id'=>$this->session->userdata('users_id')));		
+		$data['contant']=$this->load->view('search_file_view',$data,true);		
+		$this->load->view('master',$data);	
 	}
 
 	function create_folder($parent_folder_id=false) {
