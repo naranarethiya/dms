@@ -38,6 +38,15 @@ class user_model extends CI_Model {
 		return $rs->result_array();		
 	}
 
+	function get_user_withgroup() {
+		$this->db->select('dms_users.*,group_concat(dsm_group.group_name) as groups');		
+		$this->db->join('dsm_group_members','dms_users.users_id=dsm_group_members.user_id','left');
+		$this->db->join('dsm_group','dsm_group.group_id=dsm_group_members.group_id','left');
+		$this->db->group_by('dms_users.users_id');
+		$rs=$this->db->get('dms_users');
+		return $rs->result_array();			
+	}
+
 	function get_folders($filter=false) {
 		if($filter!='') {
 			apply_filter($filter);
@@ -83,4 +92,54 @@ class user_model extends CI_Model {
 		$res=$this->db->get('dsm_user_permissionlist');
 		return $res->result_array();			
 	}
+
+	function get_group($filter=false) {
+		if($filter!=''){
+			apply_filter($filter);
+		}
+		$this->db->select('dsm_group.*,count(dsm_group_members.user_id) as cnt');
+		$this->db->where('dsm_group.user_id',$this->session->userdata('users_id'));
+		$this->db->join('dsm_group_members','dsm_group_members.group_id=dsm_group.group_id');
+		$this->db->group_by('dsm_group_members.group_id');
+		$res=$this->db->get('dsm_group');
+		return $res->result_array();		
+	}
+
+	function add_group($group_data) {
+		return $this->db->insert('dsm_group',$group_data);
+	}
+
+	function update_group($group_data,$group_id) {
+		$this->db->where('group_id',$group_id);
+		$this->db->where('user_id',$this->session->userdata('users_id'));
+		return $this->db->update('dsm_group',$group_data);
+	}
+
+	function delete_group($del_id) {
+		$this->db->where_in('group_id',$del_id);
+		return $this->db->delete('dsm_group');		
+	}
+
+	function add_group_member($grp_mem) {
+		return $this->db->insert('dsm_group_members',$grp_mem);
+	}
+
+	function get_group_member($filter=false) {
+		if($filter!=''){
+			apply_filter($filter);
+		}
+		$res=$this->db->get('dsm_group_members');
+		return $res->result_array();		
+	}
+
+	function get_user_group($filter=false) {
+		if($filter!=''){
+			apply_filter($filter);
+		}
+		$this->db->select('group_concat(`dsm_group_members`.`user_id`) as user_id');		
+		$this->db->join('dsm_group_members','dsm_group_members.user_id=dms_users.users_id');
+		$this->db->group_by('dsm_group_members.group_id');
+		$res=$this->db->get('dms_users');
+		return $res->result_array();		
+	}		
 }

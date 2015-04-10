@@ -34,7 +34,7 @@ function checkIfInArrayString($array, $searchingFor) {
 
 function dateformat($date,$format=false) {
 	if(!$format) {
-		$format="d-m-Y h:i:s a";
+		$format="d M Y h:i a";
 	}
 	return date($format,strtotime($date));
 }

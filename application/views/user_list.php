@@ -19,6 +19,7 @@
 							<th>Mobile</th>
 							<th>Email</th> 
 							<th>Folder Name</th>		
+							<th>Group</th>		  			
 							<th>Added On</th>		  			
 						</tr>
 					</thead>
@@ -34,6 +35,15 @@
 							<td><?php echo $row['mobile']; ?></td>
 							<td><?php echo $row['email']; ?></td>
 							<td><?php echo $row['folder_name']; ?></td>
+							<td><?php 
+								if(isset($groups)) {
+									echo $groups[$row['users_id']];
+								}
+								else {
+									echo ""; 
+								}
+								?>
+							</td>
 							<td><?php echo dateformat($row['created_at']);?></td>
 						</tr>	
 					<?php } ?>								

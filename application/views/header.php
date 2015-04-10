@@ -20,7 +20,9 @@
                     </a>
                     <ul class="dropdown-menu" style="width: 0px;">
                         <li class="treeview"><a href="<?php echo base_url().'user'; ?>"><span>User</span></a></li>
-                        <li class="treeview"></li>
+                        <li class="treeview"><a href="<?php echo base_url().'user/add_group'; ?>"><span>Add Group</span></a></li>
+                        <li class="treeview"><a href="<?php echo base_url().'file_manager/add_keyword'; ?>"><span>Add Keyword</span></a></li>
+                        <li class="treeview"><a href="<?php echo base_url().'file_manager/add_category'; ?>"><span>Add Category</span></a></li>
                     </ul>                                            
                 </li>
                 <li class="dropdown user user-menu">

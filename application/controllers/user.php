@@ -17,6 +17,12 @@ class user extends CI_Controller {
 		$per_page="50";
 		$filter['LIMIT']=array($per_page,$page);
 		$data['user']=$this->user_model->get_users($filter);
+		$user_group=$this->user_model->get_user_withgroup();
+		$new_arr=array();
+		foreach ($user_group as $key => $value) {
+			$new_arr[$value['users_id']]=$value['groups'];
+		}
+		$data['groups']=$new_arr;
 		$this->load->library('pagination');
         $config['base_url'] = base_url().'user/index/?';
         $config['num_links'] = 2;
@@ -52,6 +58,12 @@ class user extends CI_Controller {
 			$filter['WHERE']='dms_users.created_at <='.$to_date;
 		}					
 		$data['user']=$this->user_model->get_users($filter);
+		$user_group=$this->user_model->get_user_withgroup();
+		$new_arr=array();
+		foreach ($user_group as $key => $value) {
+			$new_arr[$value['users_id']]=$value['groups'];
+		}
+		$data['groups']=$new_arr;		
 		$data['contant']=$this->load->view('user_list',$data,true);
 		$this->load->view('master',$data);		
 	}
@@ -237,7 +249,6 @@ class user extends CI_Controller {
 					set_message('User added.','success');
 					redirect_back();		
 				}
-
 			}
 			else {
 				set_message('something went wrong'.$this->db->_error_message);
@@ -252,6 +263,138 @@ class user extends CI_Controller {
 		$delquery = $this->user_model->delete_users($del_id);
 		if($delquery) {
 			$return=array("status"=>'1',"message"=>"User deleted successfully");
+		}
+		else {
+			$return=array("status"=>'0',"message"=>"Something went wrong!!");
+		}
+		echo json_encode($return);		
+	}	
+
+	function add_group($group_id=false) {
+		$data['pageTitle']="Group Details";
+		$data['title']="Group Details";
+		$this->load->model('user_model');
+		if($group_id!='') {
+			$data['edit_group']=$this->user_model->get_group(array('dsm_group.group_id'=>$group_id));
+			$data['edit_group']['userid']=$this->user_model->get_user_group(array('dsm_group_members.group_id'=>$group_id));
+		}
+		$users_id=$this->session->userdata('users_id');
+		$data['user']=$this->user_model->get_users(array('parent_user'=>$users_id));
+		$data['group']=$this->user_model->get_group();
+		$data['contant']=$this->load->view('group_addform',$data,true);
+		$this->load->view('master',$data);				
+	}
+
+	function save_group() {
+		$group_id=$this->input->post('group_id');
+		$this->load->model('user_model');
+		$this->load->library('form_validation');
+		$this->form_validation->set_error_delimiters('<div class="error">', '</div>');
+		$this->form_validation->set_rules('group_name', 'Group Name', 'required|min_length[1]|max_length[100]');
+		if ($this->form_validation->run() == FALSE) {
+			set_message(validation_errors());
+			redirect_back();		
+			return 0;
+			die;
+		}
+		$group_name=strtoupper($this->input->post('group_name'));
+		$note = $this->input->post('note');	
+		$user_id = $this->input->post('user_id');	
+		$users_id=$this->session->userdata('users_id');
+		$group_data=array(
+			'group_name'=>$group_name,
+			'user_id'=>$users_id,
+			'note'=>$note
+		);
+		if($group_id){
+			$this->db->trans_begin();
+			$res=$this->user_model->update_group($group_data,$group_id);
+
+			if($res) {
+				/* Group memeber edition*/
+				$userid=$this->user_model->get_group_member(array('group_id'=>$group_id));
+				$userid=array_column($userid,'user_id');
+				foreach ($user_id as $key => $value) {
+					if(in_array($value,$userid)) {
+						$key_to_remove=array_search($value, $userid);
+						unset($userid[$key_to_remove]);
+					}
+					else {
+						$grp_mem=array(
+							'user_id'=>$user_id[$key],
+							'group_id'=>$group_id
+						);
+						$res1=$this->user_model->add_group_member($grp_mem);											
+					}
+				}	
+				foreach($userid as $key=>$value) {
+					$this->db->where('group_id',$group_id);
+					$this->db->where('user_id',$value);
+					$this->db->delete('dsm_group_members');
+				}
+
+				if ($this->db->trans_status() === FALSE)
+				{
+					$this->db->trans_rollback();
+					set_message('something went wrong'.$this->db->_error_message);
+					redirect_back();				
+				}
+				else
+				{
+					$this->db->trans_commit();
+					set_message('Group editted.','success');
+					redirect_back();	
+				}					
+			}
+			else {
+				set_message('something went wrong'.$this->db->_error_message);
+				redirect(base_url().'user/add_group');
+			}
+		}
+		else {
+			$group_data['created_at']=date('Y-m-d H:i:s');
+			$this->db->trans_begin();
+			$res=$this->user_model->add_group($group_data);
+			$group_id=$this->db->insert_id();
+			if($res) {
+				/* Group memeber */
+				if(!empty($user_id) && $user_id[0]!='') {
+					foreach ($user_id as $key => $value) {
+						$grp_mem=array(
+							'user_id'=>$value,
+							'group_id'=>$group_id,
+							'created_at'=>date('Y-m-d H:i:s')
+						);
+						$res1=$this->user_model->add_group_member($grp_mem);						
+					}
+				}
+
+				if ($this->db->trans_status() === FALSE)
+				{
+					$this->db->trans_rollback();
+					set_message('something went wrong'.$this->db->_error_message);
+					redirect_back();				
+				}
+				else
+				{
+					$this->db->trans_commit();
+					set_message('New group added.','success');
+					redirect_back();		
+				}				
+			}
+			else {
+				set_message('something went wrong'.$this->db->_error_message);
+				redirect_back();
+			}
+		}
+	}
+
+	function del_group() {
+		$this->load->model('user_model');
+		$del_id=$this->input->post('id');
+		$delquery = $this->user_model->delete_group($del_id);
+		if($delquery) {
+			$return=array("status"=>'1',"message"=>"Group deleted successfully");
 		}
 		else {
 			$return=array("status"=>'0',"message"=>"Something went wrong!!");
