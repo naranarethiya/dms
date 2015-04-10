@@ -172,7 +172,6 @@ class dms_model extends CI_Model {
 	
 	/* return maximum access rights of user of file */
 	function get_access_mode($resource,$user,$is_folder=false) {
-		//dsm($resource);
 		$this->load->model('user_model');
 		/* Administrators have unrestricted access */
 		if($user['role']=='admin') {
@@ -320,6 +319,16 @@ class dms_model extends CI_Model {
 			}
 		}
 		return $access_list;
+	}
+
+	function log_activity($document_id,$user_id,$action="download") {
+		$insert=array(
+			"document_id"=>$document_id,
+			"user_id"=>$user_id,
+			"action"=>$action,
+			"created_at"=>date('Y-m-d H:i:s')
+		);
+		return $this->db->insert('dsm_access_log',$insert);
 	}
 }
 

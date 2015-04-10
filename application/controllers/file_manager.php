@@ -15,6 +15,7 @@ class file_manager extends CI_Controller {
 		if(!$folder_id) {
 			$folder_id=$this->session->userdata('home_folder');
 		}
+		
 		if($folder_id!='') {
 			$user=$this->session->all_userdata('users_id');
 			$folder=$this->dms_model->get_folders('',array('folder_id'=>$folder_id));
@@ -28,8 +29,7 @@ class file_manager extends CI_Controller {
 				$data['folder_info']=$folder;
 			}
 			else {
-				set_message('Access deined'.$folder_id);
-				redirect_back();
+				show_404();
 			}
 		}
 		else {
@@ -254,17 +254,22 @@ class file_manager extends CI_Controller {
 		echo $li;
 	}
 
-	function file_view($file_id) {
+	function file_view($document_id) {
 		$data['pageTitle']="File View";
 		$data['title']="File View";
 		$this->load->model('dms_model');
-		$data['file']=$this->dms_model->get_document(array('dms_documents.document_id'=>$file_id));
+		$data['file']=$this->dms_model->get_document(array('dms_documents.document_id'=>$document_id));
 		
-		if(!isset($data['file'][$file_id])) {
+		if(!isset($data['file'][$document_id]) ) {
 			show_404();
 		}
-		$data['file']=$data['file'][$file_id];
-		//dsm($data['file']); die;
+		$data['file']=$data['file'][$document_id];
+		$user=$this->session->all_userdata();
+		$access_mode=$this->dms_model->get_access_mode($data['file'],$user);
+		if($access_mode < 1 ) {
+			show_404();
+		}
+		$this->dms_model->log_activity($document_id,$this->session->userdata('users_id'),'View');
 		$data['contant']=$this->load->view('file_view',$data,true);		
 		$this->load->view('master',$data);			
 	}
@@ -277,9 +282,21 @@ class file_manager extends CI_Controller {
 			'dms_document_files.file_version'=>$version
 		);
 		$download_file=$this->dms_model->get_document($filter);
+		$user=$this->session->all_userdata();
+		if(count($download_file) < 1) {
+			show_404();
+			die;
+		}
 		$download_file=$download_file[$document_id];
-		$url='application/'.$download_file['real_path'].$download_file['file_name'];
-		_push_file($url,$download_file['file_name']);	
+		$access_mode=$this->dms_model->get_access_mode($download_file,$user);
+		if($access_mode < 1 ) {
+			show_404();
+		}
+		else {
+			$this->dms_model->log_activity($document_id,$this->session->userdata('users_id'),'Download');
+			$url='application/'.$download_file['real_path'].$download_file['file_name'];
+			_push_file($url,$download_file['file_name']);		
+		}
 	}
 
 	function add_keyword($keyword_id=false) {
