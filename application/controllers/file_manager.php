@@ -97,8 +97,39 @@ class file_manager extends CI_Controller {
 		$this->load->view('folder_addform',$data);
 	}
 
+	function edit_folder($folder_id=false) {
+		$this->load->model('dms_model');
+		$this->load->model('user_model');
+		if($folder_id!='') {
+			$user=$this->session->all_userdata('users_id');
+			$filter['folder_id']=$folder_id;
+			$folderdata=$this->dms_model->get_folders('',$filter);
+			$data['folderdata']=$folderdata[0];			
+			$access=$this->dms_model->get_access_mode($data['folderdata'],$user,true);
+			if($access>='1') {
+				if($data['folderdata']['parent_folder_id']!='') {
+					$data['parent_folder_id']=$data['folderdata']['parent_folder_id'];
+				}
+				else {
+					$data['parent_folder_id']=$this->session->userdata('home_folder');
+				}
+				/* (Owner) User details */
+				$data['owner']=$this->user_model->get_users(array('parent_user'=>$this->session->userdata('users_id')));
+				$data['owner'][]=$this->session->all_userdata();
+				$this->load->view('folder_addform',$data);	
+			}
+			else {
+				show_404();
+			}			
+		}	
+		else {
+			show_404();
+		}		
+	}
+
 	function save_folder() {
 		//dsm($this->input->post()); die;
+		$folder_id=$this->input->post('folder_id');
 		/* Including Validation Library */
 		$this->load->model('dms_model');
 		$this->load->model('user_model');
@@ -134,28 +165,80 @@ class file_manager extends CI_Controller {
 			'inherited_access'=>'1',
 			'default_access'=>'0',
 			'real_path'=>$parent_folder[0]['real_path'].$folder_name.'/',
-			'created_by'=>$this->session->userdata('users_id'),
-			'created_at'=>date('Y-m-d H:i:s')
 		);
-
-		$res=$this->user_model->add_folder($folder_data);
-		$folder_id=$this->db->insert_id();
-		if($res) {
+		if($folder_id) {
 			/* updating id path of folder*/
 			$id_path=$parent_folder[0]['id_path'].$folder_id.'/';
-			$up_folderdata=array('id_path'=>$id_path);
-			$res4=$this->user_model->update_folder($up_folderdata,$folder_id);	
-
-			mkdir(DOCUMENT_ROOT.$parent_folder[0]['real_path'].$folder_name);
-
-			set_message('Folder Created.','success');
-			redirect_back();			
+			$folder_data['id_path']=$id_path;
+			$res=$this->dms_model->update_folder($folder_data,$folder_id);
+			if($res) {
+				$folder_path=DOCUMENT_ROOT.$parent_folder[0]['real_path'].$folder_name;
+				if(!file_exists($folder_path) || !is_dir($folder_path)) {
+					mkdir($folder_path);
+				}
+				set_message('Folder editted.','success');
+				redirect_back();			
+			}
+			else {
+				set_message('something went wrong'.$this->db->_error_message);
+				redirect_back();
+			}						
 		}
 		else {
-			set_message('something went wrong'.$this->db->_error_message);
-			redirect_back();
+			$folder_data['created_by']=$this->session->userdata('users_id');
+			$folder_data['created_at']=date('Y-m-d H:i:s');			
+			$res=$this->dms_model->add_folder($folder_data);
+			$folder_id=$this->db->insert_id();
+			if($res) {
+				/* updating id path of folder*/
+				$id_path=$parent_folder[0]['id_path'].$folder_id.'/';
+				$up_folderdata=array('id_path'=>$id_path);
+				$res4=$this->dms_model->update_folder($up_folderdata,$folder_id);	
+
+				mkdir(DOCUMENT_ROOT.$parent_folder[0]['real_path'].$folder_name);
+
+				set_message('Folder Created.','success');
+				redirect_back();			
+			}
+			else {
+				set_message('something went wrong'.$this->db->_error_message);
+				redirect_back();
+			}
 		}				
 	}	
+
+	function delete_folder($folder_id=false) {
+		$this->load->model('dms_model');
+		$this->load->model('user_model');
+		if($folder_id!='') {
+			$user=$this->session->all_userdata('users_id');
+			$filter['folder_id']=$folder_id;
+			$folderdata=$this->dms_model->listout_folder($folder_id);
+			$data['folderdata']=$folderdata;	
+			$access=$this->dms_model->get_access_mode($data['folderdata'],$user,true);
+			if($access>='1') {
+				$res=$this->dms_model->delete_folder($folder_id);
+				$res1=$this->dms_model->delete_folder_member($folder_id);
+				$res2=$this->dms_model->delete_folder_document($folder_id);
+				$res3=$this->dms_model->delete_folder_document_file($folder_id);
+				
+				if($res && $res1 && $res2 && $res3) {
+					set_message('Folder deleted.','success');
+					redirect_back();
+				}
+				else {
+					set_message('something went wrong'.$this->db->_error_message);
+					redirect_back();					
+				}
+			}
+			else {
+				show_404();
+			}			
+		}	
+		else {
+			show_404();
+		}			
+	}
 
 	function create_file($parent_folder_id=false) {
 		$this->load->model('dms_model');
@@ -175,8 +258,40 @@ class file_manager extends CI_Controller {
 		$this->load->view('file_addform',$data);
 	}
 
+	function edit_file($document_id=false,$file_id=false) {
+		$this->load->model('dms_model');
+		$this->load->model('user_model');
+		if($file_id!='' && $document_id!=''){
+			$user=$this->session->all_userdata('users_id');
+			$filter['dms_documents.document_id']=$document_id;
+			$filter['dms_document_files.document_file_id']=$file_id;
+			$file=$this->dms_model->get_document($filter);
+			if(count($file) > 0) {
+				$file=$file[$document_id];
+			}
+			$access=$this->dms_model->get_access_mode($file,$user,true);
+			if($access>='1') {
+				$data['file']=$file;
+			}
+			else {
+				show_404();
+			}
+
+		}
+		/* (Owner) User details */
+		$data['owner']=$this->user_model->get_users(array('parent_user'=>$this->session->userdata('parent_user')));
+		/* Keyword details*/
+		$data['keyword']=$this->dms_model->get_keyword();
+		/* category details*/
+		$data['category']=$this->dms_model->get_category(array('user_id'=>$this->session->userdata('users_id')));
+		//dsm($data['file']); die;
+		$this->load->view('file_addform',$data);
+	}	
+
 	function save_file() {
 		//dsm($this->input->post()); die;
+		$document_file_id=$this->input->post('document_file_id');
+		$document_id=$this->input->post('document_id');
 		$this->load->model('dms_model');
 		$this->load->model('user_model');
 		$this->load->library('form_validation');
@@ -212,51 +327,137 @@ class file_manager extends CI_Controller {
 			'inherited_access'=>'1',
 			'default_access'=>'0',
 			'locked'=>'0',
-			'created_by'=>$this->session->userdata('users_id'),
-			'created_at'=>date('Y-m-d H:i:s')
 		);
+		if($document_file_id!='' && $document_id!='') {
+			//dsm($document_data); die;
+			$this->db->trans_begin();
+			$res=$this->dms_model->update_document_data($document_data,$document_id);
+			if($res) {
+				/* file upload */
+				if(!empty($_FILES) && $_FILES['file']['name']!='') {
+					$file=$_FILES['file'];
+					$ext_file=pathinfo($file['name'],PATHINFO_EXTENSION);
+					if($ext_file=="png" || $ext_file=="jpg" || $ext_file=="jpeg" || $ext_file=="gif" || $ext_file=="doc"|| $ext_file=="docx"|| $ext_file=="ppt"|| $ext_file=="pptx"|| $ext_file=="xls"|| $ext_file=="xlsx" || $ext_file=="pdf" || $ext_file=="txt") {
 
-		$res=$this->dms_model->add_document_data($document_data);
-		$document_id=$this->db->insert_id();
-		if($res){
-			/* file upload */
-			if($_FILES['file']['name'][0]!='') {
-				$file=$_FILES['file'];
-				$ext_file=pathinfo($file['name'],PATHINFO_EXTENSION);
-				if($ext_file=="png" || $ext_file=="jpg" || $ext_file=="jpeg" || $ext_file=="gif" || $ext_file=="doc"|| $ext_file=="docx"|| $ext_file=="ppt"|| $ext_file=="pptx"|| $ext_file=="xls"|| $ext_file=="xlsx" || $ext_file=="pdf" || $ext_file=="txt") {
-
-					$file_name=$file['name'];
-					/* replace special characters */
-					$replace_chrs=array('/','\\','?','%','*',':','|','"',"'",'<','>');
-					$file_name=str_replace($replace_chrs,"-",$file_name);
-					$file_size=$_FILES['file']['size'];
-					$folder=ROOT_FOLDER.$parent_folder[0]['real_path'];
-					$upload=DOCUMENT_ROOT.$parent_folder[0]['real_path'].$file_name;
-					$storepath=$folder;
-					$idpath=ROOT_FOLDER_ID.$parent_folder[0]['id_path'];
-					move_uploaded_file($file['tmp_name'],$upload);	
-					$documentfile_data=array(
-						'document_id'=>$document_id,
-						'file_name'=>$file_name,
-						'real_path'=>$storepath,
-						'id_path'=>$idpath,
-						'file_size'=>$file_size,
-						'file_mimetype'=>$ext_file,
-						'file_extension'=>$ext_file,
-						'file_version'=>'1',
-						'user_id'=>$this->session->userdata('users_id'),
-						'file_comment'=>$description,
-						'created_at'=>date('Y-m-d H:i:s')
-					);
-					//dsm($documentfile_data); die;	
-					$res1=$this->dms_model->add_documentfile_data($documentfile_data);
+						$file_name=$file['name'];
+						/* replace special characters */
+						$replace_chrs=array('/','\\','?','%','*',':','|','"',"'",'<','>');
+						$file_name=str_replace($replace_chrs,"-",$file_name);
+						$file_size=$_FILES['file']['size'];
+						$folder=ROOT_FOLDER.$parent_folder[0]['real_path'];
+						$upload=DOCUMENT_ROOT.$parent_folder[0]['real_path'].$file_name;
+						$storepath=$folder;
+						$idpath=ROOT_FOLDER_ID.$parent_folder[0]['id_path'];
+						move_uploaded_file($file['tmp_name'],$upload);	
+						$documentfile_data=array(
+							'document_id'=>$document_id,
+							'file_name'=>$file_name,
+							'real_path'=>$storepath,
+							'id_path'=>$idpath,
+							'file_size'=>$file_size,
+							'file_mimetype'=>$ext_file,
+							'file_extension'=>$ext_file,
+							'file_version'=>'1',
+							'file_comment'=>$description
+						);
+						//dsm($documentfile_data); die;	
+						$res1=$this->dms_model->update_documentfile_data($documentfile_data,$document_file_id);
+					}
+					else {
+						set_message('Undefined file format');
+						redirect_back();
+					}				
 				}
-				else {
-					set_message('Undefined file format');
-					redirect_back();
-				}				
+				if(!empty($category_id)) {
+					/* category to document */
+					$filter=array('document_category.document_id'=>$document_id);
+					$categoryid=$this->dms_model->get_document_category($filter);
+					$categoryid=array_column($categoryid,'category_id');
+					foreach ($category_id as $key => $value) {
+						if(in_array($value,$categoryid)) {
+							$key_to_remove=array_search($value, $categoryid);
+							unset($categoryid[$key_to_remove]);
+						}
+						else {
+							$category_data=array(
+								'document_id'=>$document_id,
+								'category_id'=>$value,
+							);	
+							$res1=$this->dms_model->add_document_category($category_data);
+						}
+					}	
+					
+					foreach($categoryid as $key=>$value) {
+						$this->db->where('document_id',$document_id);
+						$this->db->where('category_id',$value);
+						$this->db->delete('document_category');
+					}						
+				}
+
+				if ($this->db->trans_status() === FALSE)
+				{
+					$this->db->trans_rollback();
+					set_message('something went wrong'.$this->db->_error_message);
+					redirect_back();				
+				}
+				else
+				{
+					$this->db->trans_commit();
+					set_message('files editted successfully','success');
+					redirect_back();		
+				}
+
 			}
-			if($res1){
+			else {
+				set_message('something went wrong'.$this->db->_error_message);
+				redirect_back();				
+			}
+		}
+		else {
+			$document_data['created_by']=$this->session->userdata('users_id');
+			$document_data['created_at']=date('Y-m-d H:i:s');
+			$this->db->trans_begin();
+			$res=$this->dms_model->add_document_data($document_data);
+			$document_id=$this->db->insert_id();
+			if($res){
+				/* file upload */
+				if($_FILES['file']['name'][0]!='') {
+					$file=$_FILES['file'];
+					$ext_file=pathinfo($file['name'],PATHINFO_EXTENSION);
+					if($ext_file=="png" || $ext_file=="jpg" || $ext_file=="jpeg" || $ext_file=="gif" || $ext_file=="doc"|| $ext_file=="docx"|| $ext_file=="ppt"|| $ext_file=="pptx"|| $ext_file=="xls"|| $ext_file=="xlsx" || $ext_file=="pdf" || $ext_file=="txt") {
+
+						$file_name=$file['name'];
+						/* replace special characters */
+						$replace_chrs=array('/','\\','?','%','*',':','|','"',"'",'<','>');
+						$file_name=str_replace($replace_chrs,"-",$file_name);
+						$file_size=$_FILES['file']['size'];
+						$folder=ROOT_FOLDER.$parent_folder[0]['real_path'];
+						$upload=DOCUMENT_ROOT.$parent_folder[0]['real_path'].$file_name;
+						$storepath=$folder;
+						$idpath=ROOT_FOLDER_ID.$parent_folder[0]['id_path'];
+						move_uploaded_file($file['tmp_name'],$upload);	
+						$documentfile_data=array(
+							'document_id'=>$document_id,
+							'file_name'=>$file_name,
+							'real_path'=>$storepath,
+							'id_path'=>$idpath,
+							'file_size'=>$file_size,
+							'file_mimetype'=>$ext_file,
+							'file_extension'=>$ext_file,
+							'file_version'=>'1',
+							'user_id'=>$this->session->userdata('users_id'),
+							'file_comment'=>$description,
+							'created_at'=>date('Y-m-d H:i:s')
+						);
+						//dsm($documentfile_data); die;	
+						$res1=$this->dms_model->add_documentfile_data($documentfile_data);
+					}
+					else {
+						set_message('Undefined file format');
+						redirect_back();
+					}				
+				}
+
 				if(!empty($category_id) && $category_id[0]!='') {
 					foreach ($category_id as $key => $value) {
 						$category_data=array(
@@ -266,18 +467,63 @@ class file_manager extends CI_Controller {
 						$res1=$this->dms_model->add_document_category($category_data);
 					}
 				}
-				set_message('files uploaded successfully','success');
+
+				if ($this->db->trans_status() === FALSE)
+				{
+					$this->db->trans_rollback();
+					set_message('something went wrong'.$this->db->_error_message);
+					redirect_back();				
+				}
+				else
+				{
+					$this->db->trans_commit();
+					set_message('files uploaded successfully','success');
+					redirect_back();		
+				}		
+			}	
+			else {
+				set_message('something went wrong'.$this->db->_error_message);
 				redirect_back();
 			}
-			else {
-				set_message('Somthing went wrong');
-				redirect_back();			
-			}			
 		}	
+	}
+
+	function delete_file($document_id,$file_id) {
+		$this->load->model('dms_model');
+		if($document_id!='' && $file_id!='') {
+			$user=$this->session->all_userdata('users_id');
+			$filter=array(
+				'dms_document_files.document_id'=>$document_id,
+				'dms_document_files.document_file_id'=>$file_id,
+			);
+			$document=$this->dms_model->get_document($filter);
+			$document=$document['document_id'];
+			$access=$this->dms_model->get_access_mode($document,$user,true);
+
+			if($access>='1'){
+				if(empty($document['child'])) {
+					$res=$this->dms_model->delete_document($document_id);
+					$res=$this->dms_model->delete_documentfile($file_id);
+				}
+				else {
+					$res=$this->dms_model->delete_documentfile($file_id);
+				}
+				if($res){
+					set_message('files deleted successfully','success');
+					redirect_back();
+				}
+				else {
+					set_message('something went wrong'.$this->db->_error_message);
+					redirect_back();				
+				}				
+			}
+			else{
+				show_404();
+			}
+		}
 		else {
-			set_message('something went wrong'.$this->db->_error_message);
-			redirect_back();
-		}	
+			show_404();
+		}
 	}
 
 	function folder_tree($folder_id=false) {

@@ -83,13 +83,27 @@ class dms_model extends CI_Model {
 		return $this->db->insert('dms_documents',$document_data);
 	}
 
+	/* update document data*/
+
+	function update_document_data($document_data,$document_id) {
+		$this->db->where('document_id',$document_id);
+		return $this->db->update('dms_documents',$document_data);
+	}	
+
 	/* adding document file data*/
 
 	function add_documentfile_data($documentfile_data) {
 		return $this->db->insert('dms_document_files',$documentfile_data);
 	}
 
-	/* adding documnet category */
+	/* update document file data*/
+
+	function update_documentfile_data($documentfile_data,$document_file_id) {
+		$this->db->where('document_file_id',$document_file_id);
+		return $this->db->update('dms_document_files',$documentfile_data);
+	}
+
+	/* adding document category */
 
 	function add_document_category($category_data) {
 		return $this->db->insert('document_category',$category_data);
@@ -104,6 +118,37 @@ class dms_model extends CI_Model {
 			$user=$user[0];
 		}
 		return $user['home_folder'];
+	}
+
+	/* adding, updating and deleting folders*/	
+
+	function add_folder($fodata) {
+		return $this->db->insert('dms_folders',$fodata);
+	}
+
+	function update_folder($up_folderdata,$folder_id) {
+		$this->db->where('folder_id',$folder_id);
+		return $this->db->update('dms_folders',$up_folderdata);		
+	}
+
+	function delete_folder($folder_id) {
+		$this->db->where('folder_id',$folder_id);
+		return $this->db->delete('dms_folders');		
+	}
+
+	function delete_folder_member($folder_id) {
+		$this->db->where('parent_folder_id',$folder_id);
+		return $this->db->delete('dms_folders');		
+	}
+
+	function delete_folder_document($folder_id) {
+		$this->db->where('parent_folder_id',$folder_id);
+		return $this->db->delete('dms_documents');		
+	}
+
+	function delete_folder_document_file($folder_id) {
+		$this->db->like('id_path',$folder_id);
+		return $this->db->delete('dms_document_files');
 	}
 
 	/* get folder with owner rights */
@@ -159,7 +204,7 @@ class dms_model extends CI_Model {
 		if($filter!='') {
 			apply_filter($filter);
 		}
-		$this->db->select('dms_documents.*,dms_document_files.*,dms_users.first_name,dms_users.last_name,dsm_favorite_document.user_id as favorite_users,group_concat(dsm_category.category_title) as categories');
+		$this->db->select('dms_documents.*,dms_document_files.*,dms_users.first_name,dms_users.last_name,dsm_favorite_document.user_id as favorite_users,group_concat(dsm_category.category_title) as categories,group_concat(dsm_category.category_id) as categories_id');
 		$this->db->join("dms_document_files","dms_documents.document_id=dms_document_files.document_id");
 		$this->db->join("dsm_favorite_document","dsm_favorite_document.document_id=dms_documents.document_id",'left');
 		$this->db->join("dms_users","dms_documents.owner_id=dms_users.users_id");
@@ -266,6 +311,14 @@ class dms_model extends CI_Model {
 		return $res->result_array();		
 	}
 
+	function get_document_category($filter=false) {
+		if($filter!=''){
+			apply_filter($filter);
+		}
+		$res=$this->db->get('document_category');
+		return $res->result_array();		
+	}
+
 	function delete_category($del_id) {
 		$this->db->where_in('category_id',$del_id);
 		return $this->db->delete('dsm_category');		
@@ -279,7 +332,17 @@ class dms_model extends CI_Model {
 		$this->db->where('category_id',$category_id);
 		$this->db->where('user_id',$this->session->userdata('users_id'));
 		return $this->db->update('dsm_category',$category_data);
+	}	
+
+	function delete_document($document_id){
+		$this->db->where('dms_documents.document_id',$document_id);
+		return $this->db->delete('dms_documents');
 	}			
+
+	function delete_documentfile($file_id) {
+		$this->db->where('dms_document_files.document_file_id',$file_id);
+		return $this->db->delete('dms_document_files');		
+	}
 
 	/* 
 		@resouce array - row of dms_folders or dms_documents table
