@@ -17,29 +17,28 @@ class file_manager extends CI_Controller {
 			$folder_id=$this->session->userdata('home_folder');
 		}
 		
-		if($folder_id!='') {
-			$user=$this->session->all_userdata('users_id');
-			$folder=$this->dms_model->get_folders('',array('folder_id'=>$folder_id));
-			if(count($folder) > 0) {
-				$folder=$folder[0];
-			}
-			$access=$this->dms_model->get_access_mode($folder,$user,true);
-			if($access>='1') {
-				$data['extfolder']=$this->dms_model->listout_folder($folder_id);
-				$data['folder_id']=$folder_id;
-				$data['folder_info']=$folder;
-			}
-			else {
-				show_404();
-			}
+		$user=$this->session->all_userdata('users_id');
+		$folder=$this->dms_model->get_folders('',array('folder_id'=>$folder_id));
+		if(count($folder) < 1) {
+			show_404();
+		}
+		$folder=$folder[0];
+		$access=$this->dms_model->get_access_mode($folder,$user,true);
+		if($access>='1') {
+			$data['extfolder']=$this->dms_model->listout_folder($folder_id);
+			$data['folder_id']=$folder_id;
+			$data['folder_info']=$folder;
 		}
 		else {
-			$data['extfolder']=$this->dms_model->listout_folder();
+			show_404();
 		}
+
 		/* (Owner) User details */
-		$data['owner']=$this->user_model->get_users(array('parent_user'=>$this->session->userdata('parent_user')));
+		$data['owner']=$this->user_model->get_child_users(true);
+
 		/* category details*/
 		$data['category']=$this->dms_model->get_category(array('user_id'=>$this->session->userdata('users_id')));
+		$data['owner'][]=$this->session->all_userdata();
 
 		$data['contant']=$this->load->view('view_data',$data,true);		
 		$this->load->view('master',$data);		
@@ -56,6 +55,7 @@ class file_manager extends CI_Controller {
 		$owner_id=$this->input->post('owner_id');
 		$from_date=$this->input->post('from_date');
 		$to_date=$this->input->post('to_date');
+		$filter=array();
 		if($keyword!='') {
 			$filter['WHERE']="dms_documents.file_title like '%".$keyword."%' OR dms_document_files.file_name like '%".$keyword."%' OR dms_document_files.real_path like '%".$keyword."%' or dms_document_files.file_extension like '%".$keyword."%' or dms_document_files.file_comment like '%".$keyword."%'";
 		}
@@ -71,11 +71,13 @@ class file_manager extends CI_Controller {
 		if($to_date!='') {
 			$filter['dms_document_files.created_at <= ']=$to_date;
 		}
-
+		if(count($filter) < 1) {
+			redirect(base_url()."file_manager");
+		}
 		$file=$this->dms_model->get_document($filter);
 		$data['extfolder']['files']=$file;
 		/* (Owner) User details */
-		$data['owner']=$this->user_model->get_users(array('parent_user'=>$this->session->userdata('parent_user')));
+		$data['owner']=$this->user_model->get_child_users(true);
 		/* category details*/
 		$data['category']=$this->dms_model->get_category(array('user_id'=>$this->session->userdata('users_id')));		
 		$data['contant']=$this->load->view('search_file_view',$data,true);		
@@ -92,8 +94,7 @@ class file_manager extends CI_Controller {
 			$data['parent_folder_id']=$this->session->userdata('home_folder');
 		}
 		/* (Owner) User details */
-		$data['owner']=$this->user_model->get_users(array('parent_user'=>$this->session->userdata('users_id')));
-		$data['owner'][]=$this->session->all_userdata();
+		$data['owner']=$this->user_model->get_child_users(true);
 		$this->load->view('folder_addform',$data);
 	}
 
@@ -167,7 +168,7 @@ class file_manager extends CI_Controller {
 			$data['parent_folder_id']=$this->session->userdata('home_folder');
 		}
 		/* (Owner) User details */
-		$data['owner']=$this->user_model->get_users(array('parent_user'=>$this->session->userdata('parent_user')));
+		$data['owner']=$this->user_model->get_child_users(true);
 		/* Keyword details*/
 		$data['keyword']=$this->dms_model->get_keyword();
 		/* category details*/
@@ -495,5 +496,45 @@ class file_manager extends CI_Controller {
 			);
 		}
 		echo json_encode($return);
+	}
+
+	function edit_access($resource_id,$type="folder") {
+		$this->load->model('dms_model');
+		$user=$this->session->all_userdata();
+		if($type=="folder") {
+			/* get folder details */
+			$folder=$this->dms_model->get_folders('',array('folder_id'=>$resource_id));
+			if(count($folder) < 1) {
+				die("Forlder not exist");
+			}
+			$resource=$folder[0];
+
+			/* check if user has permission */
+			$access_mode=$this->dms_model->get_access_mode($resource,$user,true);
+			if($access_mode < 4) {
+				die("access forbidden");
+			}
+
+			/* check if has inherited Access */
+			if($resource['inherited_access']!='1') {
+				$access_list=$this->dms_model->get_access_list();
+			}
+		}
+		else {
+			$document=$this->dms_model->get_document(array("document_id"=>$resource_id));
+			if(count($document) < 1) {
+				die("file not exist");
+			}	
+			$resource=$document[0];
+
+			/* check if has inherited Access */
+			if($resource['inherited_access']!='1') {
+				$access_list=$this->dms_model->get_access_list($resource,$user);
+			}
+		}
+		
+		/* Child users details */
+		$data['owner']=$this->user_model->get_child_users(true);
+		
 	}			
 }

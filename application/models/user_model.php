@@ -141,5 +141,13 @@ class user_model extends CI_Model {
 		$this->db->group_by('dsm_group_members.group_id');
 		$res=$this->db->get('dms_users');
 		return $res->result_array();		
-	}		
+	}
+
+	function get_child_users($with_parent=false) {
+		$child=$this->get_users(array('parent_user'=>$this->session->userdata('users_id')));
+		if($with_parent) {
+			$child[]=$this->session->all_userdata();	
+		}
+		return $child;
+	}	
 }

@@ -78,7 +78,6 @@ class dms_model extends CI_Model {
 	}
 
 	/* adding document data*/
-
 	function add_document_data($document_data) {
 		return $this->db->insert('dms_documents',$document_data);
 	}
@@ -132,6 +131,9 @@ class dms_model extends CI_Model {
 		$result=$rs->result_array();
 		return $result;
 	}
+
+	/* get folder detail */
+	
 	
 	/* get document with join document file */
 	function get_documents($parent_folder,$filter=false,$join_category=false) {

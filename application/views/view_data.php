@@ -15,7 +15,7 @@
 		<div class="box box-solid">
 			<div class="box-body">
 				<div class="row">
-					<div class="col-md-3 col-sm-3">
+					<div class="col-md-3">
 						 <div class="box-header">
 								<?php
 								//dsm($folder_info);die;
@@ -38,7 +38,7 @@
 							</ol>						
 						</div>
 					</div><!-- /.col (LEFT) -->
-					<div class="col-md-9 col-sm-9">
+					<div class="col-md-9">
 						<div class="row pad">
 							<div class="col-sm-6">
 								<label style="margin-right: 10px;">
@@ -65,12 +65,14 @@
 							<a href="#" class="fa fa-fw fa-arrow-left" onclick="window.history.back();" data-toggle="tooltip" data-placement="top" title="Back"></a>
 							<a href="#" onclick="create_folder()" class="fa fa-fw fa-folder" data-toggle="tooltip" data-placement="top" title="Create Folder"></a>
 							<a href="#" onclick="create_file()" class="fa fa-fw fa-file" data-toggle="tooltip" data-placement="top" title="Create File"></a>
-							<a href="#" onclick="$(searchfile).modal('show');" class="fa fa-fw fa-filter" data-toggle="tooltip" data-placement="top" title="Filter data"></a>
+							<a href="#" onclick="edit_access()" class="fa fa-fw fa-lock" data-toggle="tooltip" data-placement="top" title="Edit Access"></a>
+							<a href="#" onclick="delete_folder()" class="fa fa-fw fa-trash-o" data-toggle="tooltip" data-placement="top" title="Delete Folder"></a>
+							<a href="#" onclick="$(searchfile).modal('show');" class="fa fa-fw fa-filter" data-toggle="tooltip" data-placement="top" title="Search File"></a>
 							</div>
 							<div class="col-sm-6 search-form">
-								<form action="#" class="text-right">
+								<form action="<?php echo base_url()."file_manager/search_file" ?>" method="post" class="text-right">
 									<div class="input-group">
-										<input type="text" class="form-control input-sm" placeholder="Search">
+										<input type="text" name="keyword" class="form-control input-sm" placeholder="Search">
 										<div class="input-group-btn">
 											<button type="submit" name="q" class="btn btn-sm btn-primary"><i class="fa fa-search"></i></button>
 										</div>
@@ -213,5 +215,10 @@ function create_file() {
 	var parent_folder_id=$('#parent_folder_id').val();
 	var url=base_url+"file_manager/create_file/"+parent_folder_id;
 	get_modaldata('New File',url);
+}
+
+function edit_access() {
+	var url=base_url+"file_manager/edit_access/"+folder_details.folder_id;
+	get_modaldata('Edit Access',url);	
 }
 </script>

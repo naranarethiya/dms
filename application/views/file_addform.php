@@ -3,7 +3,7 @@
 		<input type="hidden" name="parent_folder_id" value="<?php echo $parent_folder_id;?>">
 		<div class="col-md-12">
 			<div class="col-md-6">
-				<label>Owner's Id <span class="text-danger">*</span></label>
+				<label>File Owner<span class="text-danger">*</span></label>
 	 			<?php 
 	 				if($this->session->userdata('users_id')!='') {
 	 					$option=$this->session->userdata('users_id');
