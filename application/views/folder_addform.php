@@ -1,11 +1,19 @@
 <div class="row">
 	<form name="addfolder" action="<?php echo base_url().'file_manager/save_folder';?>" method="POST">	
+		<?php
+			if(isset($folderdata)) {
+				echo "<input type='hidden' name='folder_id' value='".$folderdata['folder_id']."'>";
+			}
+		?>
 		<input type="hidden" name="parent_folder_id" value="<?php echo $parent_folder_id;?>">
 		<div class="col-md-12">
 			<div class="col-md-6">
 				<label>Owner's Id <span class="text-danger">*</span></label>
 	 			<?php 
-	 				if($this->session->userdata('users_id')!='') {
+	 				if(isset($folderdata)) {
+	 					$option=$folderdata['owner_id'];	
+	 				}
+	 				elseif($this->session->userdata('users_id')!='') {
 	 					$option=$this->session->userdata('users_id');
 	 				}
 	 				else {
@@ -16,13 +24,13 @@
 			</div>
 			<div class="col-md-6">
 				<label>New Folder Name <span class="text-danger">*</span></label>
-				<input type="text" class="form-control" name="folder_name" id="folder_name" required palceholder="No special character" pattern="^[a-zA-Z][a-zA-Z0-9-_\. ]{1,20}$"/>
+				<input type="text" class="form-control" name="folder_name" id="folder_name" value="<?php if(isset($folderdata)) { echo $folderdata['folder_name']; }?>" required palceholder="No special character" pattern="^[a-zA-Z][a-zA-Z0-9-_\. ]{1,20}$"/>
 			</div>				
 		</div>	
 		<div class="col-md-12">
 			<div class="col-md-6">
 				<label>Description</label>
-				<textarea class="form-control" id="description" name="description" placeholder="Description"></textarea> 
+				<textarea class="form-control" id="description" name="description" placeholder="Description"><?php if(isset($folderdata)) { echo $folderdata['description']; }?></textarea> 
 			</div>					
 		</div>
 		<div class="col-md-12">	

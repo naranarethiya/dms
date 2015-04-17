@@ -215,7 +215,7 @@ class user extends CI_Controller {
 						'created_at'=>date('Y-m-d H:i:s')
 					);
 
-					$res2=$this->user_model->add_folder($folder_data);
+					$res2=$this->dms_model->add_folder($folder_data);
 					$folder_id=$this->db->insert_id();
 					if($res2) {
 						/* updating home folder of user */
@@ -225,9 +225,9 @@ class user extends CI_Controller {
 						/* updating id path of folder*/
 						$id_path=$parent_folder[0]['id_path'].$folder_id.'/';
 						$up_folderdata=array('id_path'=>$id_path);
-						$res4=$this->user_model->update_folder($up_folderdata,$folder_id);	
+						$res4=$this->dms_model->update_folder($up_folderdata,$folder_id);	
 
-						mkdir($parent_folder[0]['real_path'].$folder_name);
+						mkdir(DOCUMENT_ROOT.$parent_folder[0]['real_path'].$folder_name);
 					}		
 				}
 				else {		

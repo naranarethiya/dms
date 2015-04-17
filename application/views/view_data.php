@@ -106,8 +106,12 @@
 										<td class="small-col"></td>
 										<td class="small-col"></td>
 										<td>
-											<a href="#"><i class="fa fa-fw fa-edit" data-toggle="tooltip" data-placement="top" title="Edit"></i></a>
-											<a href="#"><i class="fa fa-fw fa-trash-o" data-toggle="tooltip" data-placement="top" title="Delete"></i></a>
+											<?php 	
+												$editurl=base_url()."file_manager/edit_folder/".$folders['folder_id'];
+												$delurl=base_url()."file_manager/delete_folder/".$folders['folder_id'];
+											?>											
+											<a href="#" onclick="get_modaldata('Edit Folder','<?php echo $editurl; ?>')"><i class="fa fa-fw fa-edit" data-toggle="tooltip" data-placement="top" title="Edit"></i></a>
+											<a href="<?php echo $delurl; ?>"><i class="fa fa-fw fa-trash-o" data-toggle="tooltip" data-placement="top" title="Delete"></i></a>
 										</td>
 									</tr>
 									<?php } 

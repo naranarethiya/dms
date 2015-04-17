@@ -1,11 +1,20 @@
 <div class="row">
 	<form name="file_add" action="<?php echo base_url().'file_manager/save_file';?>" method="POST" enctype="multipart/form-data">
-		<input type="hidden" name="parent_folder_id" value="<?php echo $parent_folder_id;?>">
+		<?php
+			if(isset($file)) {
+				echo "<input type='hidden' name='document_id' value='".$file['document_id']."'>";
+				echo "<input type='hidden' name='document_file_id' value='".$file['document_file_id']."'>";
+			}
+		?>
+		<input type="hidden" name="parent_folder_id" value="<?php if(isset($file)){ echo $file['parent_folder_id']; } else { echo $parent_folder_id; }?>">
 		<div class="col-md-12">
 			<div class="col-md-6">
 				<label>File Owner<span class="text-danger">*</span></label>
 	 			<?php 
-	 				if($this->session->userdata('users_id')!='') {
+	 				if(isset($file)) {
+	 					$option=$file['owner_id'];
+	 				}
+	 				elseif($this->session->userdata('users_id')!='') {
 	 					$option=$this->session->userdata('users_id');
 	 				}
 	 				else {
@@ -16,7 +25,7 @@
 			</div>
 			<div class="col-md-6">
 				<label>File Title</label>
-				<input type="text" class="form-control" name="file_title" required>
+				<input type="text" class="form-control" name="file_title" required value="<?php if(isset($file)) { echo $file['file_title']; } ?>">
 			</div>			
 		</div>	
 		<div class="col-md-12">
@@ -33,19 +42,31 @@
 			</div>			
 			<div class="col-md-6">
 				<label>Keyword</label>
-				<input type="text" class="form-control autocomplete" name="keywords" placeholder="Choose Keyword" />						
+				<input type="text" class="form-control autocomplete" name="keywords" placeholder="Choose Keyword" value="<?php if(isset($file)) { echo $file['keywords']; } ?>"/>						
 			</div>
 		</div>
 		<div class="col-md-12">
 			<div class="col-md-6">
 				<label>Category</label>
 	 			<?php 
-					echo generate_combobox('category_id[]',$category,'category_id','category_title','','class="form-control chosen" multiple');
+					if(isset($file['categories_id'])){
+						$option=$file['categories_id'];
+						if(strpos($option,',')!== FALSE) {
+							$option=explode(',',$option);
+						}
+						else {
+							$option=$option;
+						}
+					}
+					else {
+						$option='';
+					}
+					echo generate_combobox('category_id[]',$category,'category_id','category_title',$option,'class="form-control chosen" multiple');
 				?>							
 			</div>			
 			<div class="col-md-6">
 				<label>Description</label>
-				<textarea class="form-control" id="description" name="description" placeholder="Description"></textarea> 
+				<textarea class="form-control" id="description" name="description" placeholder="Description"><?php if(isset($file)) { echo $file['description']; } ?></textarea> 
 			</div>					
 		</div>		
 		<div class="col-md-12">	

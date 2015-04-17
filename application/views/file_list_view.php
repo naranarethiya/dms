@@ -20,9 +20,13 @@ foreach ($files as $file) {
 <td class="small-col"><?php echo $file['file_extension'];?></td>
 <td class="small-col"><?php echo formatted_size($file['file_size']);?></td>
 <td>
+	<?php 	
+		$editurl=base_url()."file_manager/edit_file/".$file['document_id']."/".$file['document_file_id'];
+		$delurl=base_url()."file_manager/delete_file/".$file['document_id']."/".$file['document_file_id'];
+	?>
 	<a href="<?php echo base_url()."file_manager/download_file/".$file['document_id'].""; ?>"><i class="fa fa-fw fa-download"></i></a>
-	<a href="#"><i class="fa fa-fw fa-edit" data-toggle="tooltip" data-placement="top" title="Edit"></i></a>
-	<a href="#"><i class="fa fa-fw fa-trash-o" data-toggle="tooltip" data-placement="top" title="Delete"></i></a>
+	<a href="#" onclick="get_modaldata('Edit File','<?php echo $editurl; ?>')"><i class="fa fa-fw fa-edit" data-toggle="tooltip" data-placement="top" title="Edit"></i></a>
+	<a href="<?php echo $delurl; ?>"><i class="fa fa-fw fa-trash-o" data-toggle="tooltip" data-placement="top" title="Delete"></i></a>
 </td>
 </tr>
 <?php } ?>
